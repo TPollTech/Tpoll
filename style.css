@@ -927,6 +927,61 @@ body {
     line-height: 1.7;
 }
 
+/* Floating Store Button */
+.store-float {
+    position: fixed;
+    bottom: 95px;
+    right: 25px;
+    width: 60px;
+    height: 60px;
+    background: #00A8E8;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(0, 168, 232, 0.4);
+    z-index: 999;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.store-float:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 30px rgba(0, 168, 232, 0.5);
+}
+
+.store-float:hover .store-tooltip {
+    opacity: 1;
+    transform: translateX(-10px);
+    visibility: visible;
+}
+
+.store-tooltip {
+    position: absolute;
+    right: 70px;
+    background: #333;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.store-tooltip::after {
+    content: '';
+    position: absolute;
+    right: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-width: 6px;
+    border-style: solid;
+    border-color: transparent transparent transparent #333;
+}
+
 /* Floating WhatsApp Button */
 .whatsapp-float {
     position: fixed;
@@ -1102,7 +1157,18 @@ body {
         height: 55px;
     }
 
+    .store-float {
+        bottom: 85px;
+        right: 20px;
+        width: 55px;
+        height: 55px;
+    }
+
     .whatsapp-tooltip {
+        display: none;
+    }
+
+    .store-tooltip {
         display: none;
     }
 
