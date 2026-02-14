@@ -1,0 +1,61 @@
+# TPoll Sistema - AI Agent Instructions
+
+## Project Overview
+**TPoll Sistema** is a Tkinter-based service order and parts management system for an electronics repair shop. Single Python file (~2330 lines) with embedded GUI, business logic, and JSON persistence.
+
+## Architecture
+
+### Core Data Model
+- **Dataclasses** (`@dataclass`): `OS`, `PartOrder`, `Sale`, `CashSnapshot`, `Orcamento`
+- **DB Class**: Manages all CRUD operations, schema migrations, auto-backups
+- **App Class** (tk.Tk): GUI with 3 tabs (OS, Peças, Financeiro)
+
+### Data Flow
+1. **Persistent Storage**: `tpoll_db.json` in `%APPDATA%\TPollSistema` (Windows) or `~/.tpollsistema` (Unix)
+2. **Backup System**: Auto-creates daily backup, keeps last 30
+3. **Schema Migration**: `DB._migrate_schema()` ensures backward compatibility when adding fields
+4. **Safe I/O**: Write to `.tmp` then atomically rename to prevent corruption
+# TPoll Sistema — Agent Guidance (concise)
+
+Purpose: Manage service orders, parts, and cash for a small electronics repair shop. UI is Tkinter-based; business logic and persistence are tightly coupled.
+
+Quick overview
+- Main UI & business logic: `sistema com interface.py` (monolithic, ~2000+ lines).
+- DB and migrations: `db.py` (safe write to .tmp, backup rotation, `_migrate_schema()`).
+- Models and helpers: `models.py`, `utils.py`, `receipts.py` (ESC/POS formatting + Windows printing).
+- Entrypoints: run `main.py` or execute `sistema com interface.py` directly.
+
+Key concepts an agent must know
+- Data model: core objects are `OS`, `PartOrder`, `Sale`, `CashSnapshot`, `Orcamento` (dataclasses). Changes require updating dataclasses and `_migrate_schema()`.
+- Persistence: JSON file `tpoll_db.json` under app data; backups in `backups/`.
+- UI conventions: Portuguese text, currency helpers `fmt_money()`, date helpers `parse_date_br()` / `date_to_br()`.
+- Business rules to preserve: supplier arrival logic (`supplier_arrival_from()`), payment split (`entrada_paga`, `saldo_pago`), 90-day pickup policy (`POLITICA_NAO_RETIRADO`).
+
+Common developer tasks (examples)
+- Add a new field to `OS`:
+  1. Add dataclass attribute in `sistema com interface.py`.
+  2. Add migration in `DB._migrate_schema()` to set defaults for existing rows.
+  3. Update any GUI form builder and load/save logic that touches the field.
+- Update printing: `receipts.py` formats receipts; on Windows printing uses `win32print` and CP860 encoding.
+
+Build & runtime notes
+- Run locally: `python main.py` or `python "sistema com interface.py"`.
+- Build with PyInstaller: `TPoll.spec` and `TPollSistema.spec` are provided; code detects frozen state with `getattr(sys, "frozen", False)`.
+- Windows-only considerations: thermal printing depends on `pywin32` (win32print).
+
+Agent conventions & constraints
+- Be conservative: preserve existing migration logic when adding fields; do not change storage format without a migration path.
+- Prefer small, focused edits in `sistema com interface.py` — large refactors are high-risk due to tight coupling.
+- Use the app GUI for manual verification (no test harness available). Document manual steps you used to verify changes.
+
+Where to look first
+- `sistema com interface.py` — main surface area for features and bugs.
+- `db.py` — persistence, backups, migrations.
+- `receipts.py` — printing and encoding details.
+- `tpoll_db.json` and `backups/` — example data and backup behavior.
+
+Next steps after edits
+- Run the app locally and exercise changed functionality through the GUI.
+- If adding fields, include a `_migrate_schema()` entry and incrementally test with the existing `tpoll_db.json`.
+
+If anything above is unclear or you'd like a longer agent guide with examples (code snippets, exact line pointers), tell me which area to expand.

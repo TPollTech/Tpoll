@@ -1,0 +1,142 @@
+╔═══════════════════════════════════════════════════════════════╗
+║    PUBLICAR SITE - TPoll Assistência Técnica                 ║
+║    Guia Rápido em 4 Passos                                   ║
+╚═══════════════════════════════════════════════════════════════╝
+
+📌 MÉTODO RECOMENDADO: GitHub Pages (100% Grátis)
+
+┌─────────────────────────────────────────────────────────────┐
+│ PASSO 1: Criar conta no GitHub                              │
+└─────────────────────────────────────────────────────────────┘
+   → Acesse: https://github.com/signup
+   → Crie sua conta gratuita
+   → Confirme o e-mail
+
+┌─────────────────────────────────────────────────────────────┐
+│ PASSO 2: Criar repositório                                  │
+└─────────────────────────────────────────────────────────────┘
+   → Clique no botão "+" no topo → "New repository"
+   → Nome: tpoll-assistencia
+   → ✓ Marque como PUBLIC (importante!)
+   → Clique "Create repository"
+
+┌─────────────────────────────────────────────────────────────┐
+│ PASSO 3: Upload dos arquivos                                │
+└─────────────────────────────────────────────────────────────┘
+   → Na página do repositório criado
+   → Clique em "uploading an existing file"
+   → Arraste TODOS os arquivos da pasta "site":
+     • index.html
+     • style.css
+     • script.js
+     • .nojekyll
+     • (todos os outros)
+   → Mensagem: "Initial commit"
+   → Clique "Commit changes"
+
+┌─────────────────────────────────────────────────────────────┐
+│ PASSO 4: Ativar GitHub Pages                                │
+└─────────────────────────────────────────────────────────────┘
+   → Vá em Settings (Configurações)
+   → Menu lateral → Pages
+   → Source: "Deploy from a branch"
+   → Branch: "main" + pasta "/root"
+   → Clique "Save"
+   → AGUARDE 2-3 MINUTOS
+
+╔═══════════════════════════════════════════════════════════════╗
+║  ✅ PRONTO! Seu site estará online em:                       ║
+║                                                               ║
+║  https://seu-usuario.github.io/tpoll-assistencia/           ║
+║                                                               ║
+║  Acessível de qualquer lugar do mundo! 🌍                    ║
+╚═══════════════════════════════════════════════════════════════╝
+
+
+═══════════════════════════════════════════════════════════════
+ ALTERNATIVAS AINDA MAIS RÁPIDAS
+═══════════════════════════════════════════════════════════════
+
+🟢 NETLIFY (Drag & Drop - 30 segundos)
+   1. Acesse: https://app.netlify.com/drop
+   2. Arraste a pasta "site"
+   3. Pronto! URL: https://nome-aleatorio.netlify.app
+
+🔵 VERCEL (Deploy automático)
+   1. Acesse: https://vercel.com/new
+   2. Importe do GitHub ou faça upload
+   3. Pronto! URL: https://tpoll.vercel.app
+
+
+═══════════════════════════════════════════════════════════════
+ SCRIPT AUTOMÁTICO (Requer Git instalado)
+═══════════════════════════════════════════════════════════════
+
+   1. Instale Git: https://git-scm.com/download/win
+   2. Crie o repositório VAZIO no GitHub
+   3. Clique com botão direito em "deploy.ps1"
+   4. "Executar com PowerShell"
+   5. Siga as instruções
+
+
+═══════════════════════════════════════════════════════════════
+ ARQUIVOS INCLUÍDOS
+═══════════════════════════════════════════════════════════════
+
+   ✓ index.html          - Página principal
+   ✓ style.css           - Design e cores
+   ✓ script.js           - Animações
+   ✓ .nojekyll           - Configuração GitHub
+   ✓ DEPLOY.md           - Guia completo
+   ✓ COMO-PUBLICAR.html  - Guia visual
+   ✓ deploy.ps1          - Script automático
+   ✓ INSTRUCOES.txt      - Este arquivo
+
+
+═══════════════════════════════════════════════════════════════
+ CHECKLIST PÓS-DEPLOY
+═══════════════════════════════════════════════════════════════
+
+   [ ] Acessar site e verificar se está funcionando
+   [ ] Testar em celular
+   [ ] Testar botão do WhatsApp
+   [ ] Testar link do e-mail
+   [ ] Compartilhar URL com clientes
+   [ ] Adicionar URL no cartão de visitas
+   [ ] Divulgar nas redes sociais
+   [ ] Adicionar nos perfis do Google/Instagram
+
+
+═══════════════════════════════════════════════════════════════
+ DÚVIDAS FREQUENTES
+═══════════════════════════════════════════════════════════════
+
+   Q: O site é grátis?
+   A: Sim! GitHub Pages, Netlify e Vercel são 100% gratuitos.
+
+   Q: Preciso pagar hospedagem?
+   A: Não! O site já inclui tudo que precisa.
+
+   Q: Posso usar domínio próprio (www.meusite.com)?
+   A: Sim! Todas as plataformas permitem domínio personalizado.
+
+   Q: O site funcionará no celular?
+   A: Sim! É totalmente responsivo.
+
+   Q: Posso atualizar o site depois?
+   A: Sim! Basta fazer upload dos novos arquivos.
+
+
+═══════════════════════════════════════════════════════════════
+ SUPORTE
+═══════════════════════════════════════════════════════════════
+
+   📧 Leia o DEPLOY.md para instruções detalhadas
+   🌐 Guia visual: Abra o arquivo COMO-PUBLICAR.html
+   💻 Automático: Execute o deploy.ps1
+
+
+╔═══════════════════════════════════════════════════════════════╗
+║  🎉 Boa sorte com seu site!                                  ║
+║  Em poucos minutos estará acessível globalmente!             ║
+╚═══════════════════════════════════════════════════════════════╝

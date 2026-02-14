@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TPoll Assistência Técnica - Conserto e manutenção de eletrônicos com qualidade e confiança. Celulares, notebooks e mais.">
+    <meta name="author" content="Enzo Tassinari Poll">
+    <meta name="keywords" content="assistência técnica, conserto celular, reparo notebook, manutenção eletrônicos, troca de tela, bateria, conserto eletrônicos">
+    
+    <!-- Open Graph / Social Media -->
+    <meta property="og:title" content="TPoll Assistência Técnica">
+    <meta property="og:description" content="Conserto e manutenção de eletrônicos com qualidade, agilidade e confiança. Diagnóstico gratuito!">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="pt_BR">
+    
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#00A8E8">
+    <meta name="msapplication-TileColor" content="#00A8E8">
+    
+    <!-- Schema Markup - Local Business -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "name": "TPoll Assistência Técnica",
+        "description": "Conserto e manutenção de eletrônicos com qualidade e confiança. Celulares, notebooks e mais.",
+        "telephone": "+55-55-99676-5404",
+        "email": "tpollassistenciatecnica@gmail.com",
+        "url": "https://tpoll.com.br",
+        "priceRange": "$$",
+        "openingHours": "Mo-Fr 09:00-17:00",
+        "serviceType": ["Conserto de celulares", "Reparo de notebooks", "Manutenção de eletrônicos"],
+        "areaServed": "Brasil",
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.9",
+            "reviewCount": "127"
+        }
+    }
+    </script>
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🔧</text></svg>">
+    <title>TPoll Assistência Técnica</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="#home" class="nav-logo">🔧 TPoll</a>
+            <button class="nav-toggle" id="navToggle" aria-label="Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema">
+                <span class="theme-icon-light">☀️</span>
+                <span class="theme-icon-dark">🌙</span>
+            </button>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="#home" class="nav-link">Início</a></li>
+                <li><a href="#sobre" class="nav-link">Sobre</a></li>
+                <li><a href="#servicos" class="nav-link">Serviços</a></li>
+                <li><a href="#diferenciais" class="nav-link">Diferenciais</a></li>
+                <li><a href="#depoimentos" class="nav-link">Depoimentos</a></li>
+                <li><a href="#faq" class="nav-link">FAQ</a></li>
+                <li><a href="#contato" class="nav-link nav-cta">Contato</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header id="home" class="hero">
+        <div class="container">
+            <div class="logo-container">
+                <div class="logo-icon">🔧</div>
+            </div>
+            <h1 class="hero-title">TPoll Assistência Técnica</h1>
+            <p class="hero-subtitle">
+                <span id="typewriter"></span><span class="typewriter-cursor">|</span>
+            </p>
+            <div class="hero-features">
+                <div class="hero-feature">✓ Diagnóstico Gratuito</div>
+                <div class="hero-feature">✓ Garantia do Serviço</div>
+                <div class="hero-feature">✓ Atendimento Rápido</div>
+            </div>
+            <a href="#contato" class="cta-button">Solicite um orçamento</a>
+        </div>
+    </header>
+
+    <!-- Sobre Section -->
+    <section id="sobre" class="section">
+        <div class="container">
+            <h2 class="section-title">Sobre</h2>
+            <div class="content">
+                <p>A <strong>TPoll Assistência Técnica</strong> é especializada em conserto e manutenção de aparelhos eletrônicos, oferecendo soluções rápidas e confiáveis para seus equipamentos.</p>
+                <p>Com anos de experiência no mercado, trabalhamos com profissionalismo e transparência, garantindo que seu aparelho seja tratado com o máximo cuidado e atenção.</p>
+                <p>Nosso compromisso é devolver seu equipamento funcionando perfeitamente, com garantia do serviço realizado e sempre mantendo você informado sobre cada etapa do processo.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Brands Section -->
+    <section class="brands-section">
+        <div class="container">
+            <p class="brands-title">Atendemos todas as marcas</p>
+            <div class="brands-grid">
+                <div class="brand-item">Apple</div>
+                <div class="brand-item">Samsung</div>
+                <div class="brand-item">Xiaomi</div>
+                <div class="brand-item">Motorola</div>
+                <div class="brand-item">Dell</div>
+                <div class="brand-item">Lenovo</div>
+                <div class="brand-item">LG</div>
+                <div class="brand-item">ASUS</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-number" data-target="500">0</span>
+                    <span class="stat-plus">+</span>
+                    <span class="stat-label">Aparelhos Consertados</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" data-target="3">0</span>
+                    <span class="stat-plus">+</span>
+                    <span class="stat-label">Anos de Experiência</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" data-target="98">0</span>
+                    <span class="stat-plus">%</span>
+                    <span class="stat-label">Clientes Satisfeitos</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" data-target="90">0</span>
+                    <span class="stat-label">Dias de Garantia</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Diferenciais Section -->
+    <section id="diferenciais" class="section section-alt">
+        <div class="container">
+            <h2 class="section-title">Por que escolher a TPoll?</h2>
+            <div class="benefits-grid">
+                <div class="benefit-card">
+                    <div class="benefit-icon">⚡</div>
+                    <h3>Atendimento Rápido</h3>
+                    <p>Diagnóstico em até 24h e reparo ágil para você não ficar sem seu aparelho</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">💎</div>
+                    <h3>Peças de Qualidade</h3>
+                    <p>Trabalhamos apenas com peças originais ou de primeira linha</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">🛡️</div>
+                    <h3>Garantia</h3>
+                    <p>Todos os serviços com garantia de 90 dias</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">💰</div>
+                    <h3>Preço Justo</h3>
+                    <p>Orçamento transparente sem custos ocultos</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- O que fazemos Section -->
+    <section id="servicos" class="section section-alt">
+        <div class="container">
+            <h2 class="section-title">Nossos Serviços</h2>
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-icon">📱</div>
+                    <h3>Celulares e Tablets</h3>
+                    <p>Conserto de telas, baterias, conectores de carga, problemas de software e muito mais. Atendemos todas as marcas e modelos.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">💻</div>
+                    <h3>Notebooks e Computadores</h3>
+                    <p>Manutenção preventiva, limpeza, troca de peças, upgrade de componentes, formatação e remoção de vírus.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">🔧</div>
+                    <h3>Eletrônicos em Geral</h3>
+                    <p>Conserto e manutenção de diversos aparelhos eletrônicos com diagnóstico preciso e orçamento sem compromisso.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Como Funciona Section -->
+    <section id="processo" class="section section-alt">
+        <div class="container">
+            <h2 class="section-title">Como Funciona</h2>
+            <div class="process-steps">
+                <div class="process-step">
+                    <div class="step-number">1</div>
+                    <h3>Entre em Contato</h3>
+                    <p>WhatsApp ou e-mail</p>
+                </div>
+                <div class="process-arrow">→</div>
+                <div class="process-step">
+                    <div class="step-number">2</div>
+                    <h3>Diagnóstico</h3>
+                    <p>Análise gratuita do problema</p>
+                </div>
+                <div class="process-arrow">→</div>
+                <div class="process-step">
+                    <div class="step-number">3</div>
+                    <h3>Orçamento</h3>
+                    <p>Aprovação sem compromisso</p>
+                </div>
+                <div class="process-arrow">→</div>
+                <div class="process-step">
+                    <div class="step-number">4</div>
+                    <h3>Reparo</h3>
+                    <p>Conserto rápido e eficiente</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Depoimentos Section -->
+    <section id="depoimentos" class="section">
+        <div class="container">
+            <h2 class="section-title">O Que Nossos Clientes Dizem</h2>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">★★★★★</div>
+                    <p class="testimonial-text">"Excelente atendimento! Meu celular ficou pronto no mesmo dia e o preço foi muito justo. Recomendo!"</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">M</div>
+                        <div class="author-info">
+                            <strong>Maria S.</strong>
+                            <span>Troca de tela - iPhone</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">★★★★★</div>
+                    <p class="testimonial-text">"Levei meu notebook que não ligava mais e conseguiram resolver rapidamente. Ótimo profissional!"</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">J</div>
+                        <div class="author-info">
+                            <strong>João P.</strong>
+                            <span>Reparo de notebook</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">★★★★★</div>
+                    <p class="testimonial-text">"Atendimento transparente e honesto. Me explicaram tudo antes de fazer o serviço. Voltarei sempre!"</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">A</div>
+                        <div class="author-info">
+                            <strong>Ana C.</strong>
+                            <span>Troca de bateria</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="section section-alt">
+        <div class="container">
+            <h2 class="section-title">Perguntas Frequentes</h2>
+            <div class="faq-container">
+                <div class="faq-item">
+                    <button class="faq-question" aria-expanded="false">
+                        <span>Quanto tempo demora o conserto?</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>A maioria dos reparos simples (troca de tela, bateria) são feitos no mesmo dia. Reparos mais complexos podem levar de 2 a 5 dias úteis, dependendo da disponibilidade de peças.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" aria-expanded="false">
+                        <span>O diagnóstico é realmente gratuito?</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Sim! Fazemos a análise completa do seu aparelho sem nenhum custo. Você só paga se aprovar o orçamento e decidir fazer o reparo conosco.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" aria-expanded="false">
+                        <span>Qual a garantia do serviço?</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Todos os nossos serviços têm garantia de 90 dias. Se houver qualquer problema relacionado ao reparo realizado, você pode retornar sem custo adicional.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" aria-expanded="false">
+                        <span>Trabalham com peças originais?</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Trabalhamos com peças originais e de primeira linha. Sempre apresentamos as opções disponíveis e deixamos você escolher a que melhor atende suas necessidades e orçamento.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Localização Section -->
+    <section id="localizacao" class="section section-alt">
+        <div class="container">
+            <h2 class="section-title">Região de Atendimento</h2>
+            <div class="location-content">
+                <div class="location-info">
+                    <div class="location-icon">📍</div>
+                    <h3>Itacurubi - RS</h3>
+                    <p>Av. Dez de Abril, 659 - Centro<br>Itacurubi - RS, 97685-000</p>
+                    <div class="location-features">
+                        <div class="location-feature">
+                            <span class="feature-icon">🏠</span>
+                            <span>Atendimento Presencial</span>
+                        </div>
+                        <div class="location-feature">
+                            <span class="feature-icon">📦</span>
+                            <span>Recebemos via Correios</span>
+                        </div>
+                        <div class="location-feature">
+                            <span class="feature-icon">🚗</span>
+                            <span>Busca e Entrega*</span>
+                        </div>
+                    </div>
+                    <p class="location-note">*Consulte disponibilidade para sua região</p>
+                </div>
+                <div class="location-map">
+                    <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d218.52492487630167!2d-55.23548780597062!3d-28.797187362300622!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sbr!4v1771017632158!5m2!1sen!2sbr"
+                        width="100%" 
+                        height="300" 
+                        style="border:0; border-radius: 12px;" 
+                        allowfullscreen="" 
+                        loading="lazy" 
+                        referrerpolicy="no-referrer-when-downgrade"
+                        title="Localização TPoll Assistência Técnica">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contato Section -->
+    <section id="contato" class="section">
+        <div class="container">
+            <h2 class="section-title">Solicite um Orçamento</h2>
+            <div class="contact-wrapper">
+                <!-- Formulário -->
+                <div class="contact-form-container">
+                    <h3>Preencha seus dados</h3>
+                    <p class="form-subtitle">Descreva o problema e entraremos em contato rapidamente!</p>
+                    <form id="contactForm" class="contact-form">
+                        <div class="form-group">
+                            <label for="nome">Nome *</label>
+                            <input type="text" id="nome" name="nome" placeholder="Seu nome completo" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="telefone">Telefone/WhatsApp *</label>
+                                <input type="tel" id="telefone" name="telefone" placeholder="(00) 00000-0000" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="aparelho">Tipo de Aparelho *</label>
+                                <select id="aparelho" name="aparelho" required>
+                                    <option value="">Selecione...</option>
+                                    <option value="Celular">Celular</option>
+                                    <option value="Tablet">Tablet</option>
+                                    <option value="Notebook">Notebook</option>
+                                    <option value="Computador">Computador</option>
+                                    <option value="Outro">Outro</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="modelo">Marca/Modelo do Aparelho</label>
+                            <input type="text" id="modelo" name="modelo" placeholder="Ex: iPhone 13, Samsung Galaxy S21, Dell Inspiron...">
+                        </div>
+                        <div class="form-group">
+                            <label for="problema">Descreva o Problema *</label>
+                            <textarea id="problema" name="problema" rows="4" placeholder="Conte-nos o que está acontecendo com seu aparelho..." required></textarea>
+                        </div>
+                        <button type="submit" class="form-submit">
+                            <span>Enviar via WhatsApp</span>
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+                <!-- Info de contato -->
+                <div class="contact-info-container">
+                    <h3>Outras formas de contato</h3>
+                    <div class="contact-info">
+                        <div class="contact-item">
+                            <div class="contact-icon">📱</div>
+                            <div>
+                                <strong>WhatsApp</strong>
+                                <a href="https://wa.me/5555996765404" target="_blank" class="whatsapp-link">(55) 99676-5404</a>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon">📧</div>
+                            <div>
+                                <strong>E-mail</strong>
+                                <a href="mailto:tpollassistenciatecnica@gmail.com">tpollassistenciatecnica@gmail.com</a>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon">🕐</div>
+                            <div>
+                                <strong>Horário de Atendimento</strong>
+                                <span>Segunda a Sexta: 9h às 17h</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="trust-box">
+                        <div class="trust-icon">🔒</div>
+                        <p>Trabalhamos com transparência, qualidade e garantia. Seu equipamento está em boas mãos!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Calculadora de Orçamento -->
+    <section id="calculadora" class="section">
+        <div class="container">
+            <h2 class="section-title">Simule seu Orçamento</h2>
+            <p class="calculator-subtitle">Tenha uma estimativa de preço antes mesmo de entrar em contato</p>
+            <div class="calculator-container">
+                <div class="calculator-form">
+                    <div class="calc-group">
+                        <label>Tipo de Aparelho</label>
+                        <div class="calc-options" id="calcDevice">
+                            <button type="button" class="calc-option" data-value="celular" data-base="80">
+                                <span class="calc-option-icon">📱</span>
+                                <span>Celular</span>
+                            </button>
+                            <button type="button" class="calc-option" data-value="tablet" data-base="100">
+                                <span class="calc-option-icon">📱</span>
+                                <span>Tablet</span>
+                            </button>
+                            <button type="button" class="calc-option" data-value="notebook" data-base="120">
+                                <span class="calc-option-icon">💻</span>
+                                <span>Notebook</span>
+                            </button>
+                            <button type="button" class="calc-option" data-value="desktop" data-base="100">
+                                <span class="calc-option-icon">🖥️</span>
+                                <span>Desktop</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="calc-group">
+                        <label>Tipo de Serviço</label>
+                        <div class="calc-options" id="calcService">
+                            <button type="button" class="calc-option" data-value="tela" data-mult="2">
+                                <span>Troca de Tela</span>
+                            </button>
+                            <button type="button" class="calc-option" data-value="bateria" data-mult="1">
+                                <span>Troca de Bateria</span>
+                            </button>
+                            <button type="button" class="calc-option" data-value="conector" data-mult="0.8">
+                                <span>Conector de Carga</span>
+                            </button>
+                            <button type="button" class="calc-option" data-value="software" data-mult="0.6">
+                                <span>Problema de Software</span>
+                            </button>
+                            <button type="button" class="calc-option" data-value="limpeza" data-mult="0.5">
+                                <span>Limpeza/Manutenção</span>
+                            </button>
+                            <button type="button" class="calc-option" data-value="outro" data-mult="1">
+                                <span>Outro</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="calculator-result">
+                    <div class="result-box" id="calcResult">
+                        <p class="result-label">Estimativa de Preço</p>
+                        <p class="result-value">Selecione as opções</p>
+                        <p class="result-note">*Valor aproximado. O preço final depende da avaliação técnica.</p>
+                    </div>
+                    <a href="#contato" class="result-cta">Solicitar Orçamento Real</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <span class="footer-logo">🔧 TPoll</span>
+                    <p>Assistência Técnica de Confiança</p>
+                    <div class="footer-social">
+                        <a href="https://instagram.com/tpollassistencia" target="_blank" rel="noopener noreferrer" aria-label="Instagram" class="social-link">
+                            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M12 2c2.717 0 3.056.01 4.122.06 1.065.05 1.79.217 2.428.465.66.254 1.216.598 1.772 1.153a4.908 4.908 0 0 1 1.153 1.772c.247.637.415 1.363.465 2.428.047 1.066.06 1.405.06 4.122 0 2.717-.01 3.056-.06 4.122-.05 1.065-.218 1.79-.465 2.428a4.883 4.883 0 0 1-1.153 1.772 4.915 4.915 0 0 1-1.772 1.153c-.637.247-1.363.415-2.428.465-1.066.047-1.405.06-4.122.06-2.717 0-3.056-.01-4.122-.06-1.065-.05-1.79-.218-2.428-.465a4.89 4.89 0 0 1-1.772-1.153 4.904 4.904 0 0 1-1.153-1.772c-.248-.637-.415-1.363-.465-2.428C2.013 15.056 2 14.717 2 12c0-2.717.01-3.056.06-4.122.05-1.066.217-1.79.465-2.428a4.88 4.88 0 0 1 1.153-1.772A4.897 4.897 0 0 1 5.45 2.525c.638-.248 1.362-.415 2.428-.465C8.944 2.013 9.283 2 12 2zm0 1.802c-2.67 0-2.986.01-4.04.058-.976.045-1.505.207-1.858.344-.466.182-.8.398-1.15.748-.35.35-.566.684-.748 1.15-.137.353-.3.882-.344 1.857-.048 1.055-.058 1.37-.058 4.041 0 2.67.01 2.986.058 4.04.045.976.207 1.505.344 1.858.182.466.399.8.748 1.15.35.35.684.566 1.15.748.353.137.882.3 1.857.344 1.054.048 1.37.058 4.041.058 2.67 0 2.987-.01 4.04-.058.976-.045 1.505-.207 1.858-.344.466-.182.8-.398 1.15-.748.35-.35.566-.684.748-1.15.137-.353.3-.882.344-1.857.048-1.055.058-1.37.058-4.041 0-2.67-.01-2.986-.058-4.04-.045-.976-.207-1.505-.344-1.858a3.097 3.097 0 0 0-.748-1.15 3.098 3.098 0 0 0-1.15-.748c-.353-.137-.882-.3-1.857-.344-1.055-.048-1.37-.058-4.041-.058zm0 3.063a5.135 5.135 0 1 1 0 10.27 5.135 5.135 0 0 1 0-10.27zm0 8.468a3.333 3.333 0 1 0 0-6.666 3.333 3.333 0 0 0 0 6.666zm6.538-8.671a1.2 1.2 0 1 1-2.4 0 1.2 1.2 0 0 1 2.4 0z"/></svg>
+                        </a>
+                        <a href="https://facebook.com/tpollassistencia" target="_blank" rel="noopener noreferrer" aria-label="Facebook" class="social-link">
+                            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                        </a>
+                        <a href="https://wa.me/5555996765404" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" class="social-link">
+                            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                        </a>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <a href="#home">Início</a>
+                    <a href="#servicos">Serviços</a>
+                    <a href="#calculadora">Simular Orçamento</a>
+                    <a href="#contato">Contato</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 TPoll Assistência Técnica - Todos os direitos reservados</p>
+                <p class="footer-author">Responsável técnico: <strong>Enzo Tassinari Poll</strong></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating WhatsApp Button -->
+    <a href="https://wa.me/5555996765404?text=Ol%C3%A1!%20Gostaria%20de%20solicitar%20um%20or%C3%A7amento%20para%20conserto%20do%20meu%20aparelho." 
+       class="whatsapp-float" 
+       target="_blank" 
+       rel="noopener noreferrer"
+       aria-label="Contato via WhatsApp">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+        <span class="whatsapp-tooltip">Fale conosco!</span>
+    </a>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="backToTop" aria-label="Voltar ao topo">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+            <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/>
+        </svg>
+    </button>
+
+    <!-- Cookie Banner LGPD -->
+    <div class="cookie-banner" id="cookieBanner">
+        <div class="cookie-content">
+            <p>🍪 Este site utiliza cookies para melhorar sua experiência. Ao continuar navegando, você concorda com nossa <a href="#">Política de Privacidade</a>.</p>
+            <div class="cookie-buttons">
+                <button class="cookie-accept" id="cookieAccept">Aceitar</button>
+                <button class="cookie-decline" id="cookieDecline">Recusar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

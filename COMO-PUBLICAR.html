@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Como Publicar o Site - TPoll Assistência</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            line-height: 1.6;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        h1 { color: #00A8E8; border-bottom: 3px solid #00A8E8; padding-bottom: 10px; }
+        h2 { color: #2c3e50; margin-top: 30px; }
+        .step { 
+            background: #f8f9fa; 
+            padding: 20px; 
+            margin: 15px 0; 
+            border-left: 4px solid #00A8E8;
+            border-radius: 4px;
+        }
+        .step strong { color: #00A8E8; font-size: 1.1em; }
+        code {
+            background: #1a1a1a;
+            color: #00A8E8;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .url {
+            background: #e8f4f8;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 1.1em;
+            word-break: break-all;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        a { color: #00A8E8; text-decoration: none; font-weight: 600; }
+        a:hover { text-decoration: underline; }
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #00A8E8;
+            color: white;
+            border-radius: 6px;
+            margin: 10px 5px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .btn:hover { background: #0086b8; }
+        ul { padding-left: 25px; }
+        li { margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Como Publicar seu Site</h1>
+        <p>Siga o método mais fácil para você:</p>
+
+        <h2>📱 Método 1: GitHub Pages (Visual - MAIS FÁCIL)</h2>
+        
+        <div class="step">
+            <strong>1.</strong> Crie uma conta no GitHub<br>
+            <a href="https://github.com/signup" target="_blank" class="btn">Criar Conta</a>
+        </div>
+
+        <div class="step">
+            <strong>2.</strong> Crie um novo repositório<br>
+            • Clique no botão <code>+</code> no topo → New repository<br>
+            • Nome: <code>tpoll-assistencia</code><br>
+            • Marque como <strong>PUBLIC</strong><br>
+            • Clique em <code>Create repository</code>
+        </div>
+
+        <div class="step">
+            <strong>3.</strong> Faça upload dos arquivos<br>
+            • Clique em <code>uploading an existing file</code><br>
+            • Arraste TODOS os arquivos da pasta <code>site</code><br>
+            • Escreva: "Initial commit"<br>
+            • Clique em <code>Commit changes</code>
+        </div>
+
+        <div class="step">
+            <strong>4.</strong> Ative o GitHub Pages<br>
+            • Vá em <code>Settings</code> (Configurações)<br>
+            • Menu lateral → <code>Pages</code><br>
+            • Source: <code>Deploy from a branch</code><br>
+            • Branch: <code>main</code> + pasta <code>/root</code><br>
+            • Clique em <code>Save</code>
+        </div>
+
+        <div class="success">
+            ✅ <strong>Pronto!</strong> Aguarde 2-3 minutos e seu site estará no ar em:<br>
+            <div class="url">https://seu-usuario.github.io/tpoll-assistencia/</div>
+        </div>
+
+        <h2>💻 Método 2: Script Automático (via PowerShell)</h2>
+        
+        <div class="warning">
+            ⚠️ <strong>Requer Git instalado.</strong> Baixe em: <a href="https://git-scm.com/download/win" target="_blank">git-scm.com</a>
+        </div>
+
+        <div class="step">
+            <strong>1.</strong> Crie o repositório no GitHub (vazio)<br>
+            <strong>2.</strong> Clique com botão direito em <code>deploy.ps1</code><br>
+            <strong>3.</strong> Selecione "Executar com PowerShell"<br>
+            <strong>4.</strong> Siga as instruções na tela
+        </div>
+
+        <h2>🌐 Outras Opções Rápidas</h2>
+
+        <div class="step">
+            <strong>Netlify</strong> - Drag & Drop<br>
+            <a href="https://app.netlify.com/drop" target="_blank" class="btn">Deploy no Netlify</a><br>
+            <small>Arraste a pasta <code>site</code> e pronto!</small>
+        </div>
+
+        <div class="step">
+            <strong>Vercel</strong> - Deploy Rápido<br>
+            <a href="https://vercel.com/new" target="_blank" class="btn">Deploy no Vercel</a><br>
+            <small>Importe do GitHub ou faça upload</small>
+        </div>
+
+        <h2>✅ Checklist Pós-Deploy</h2>
+        <ul>
+            <li>✓ Testar site em celular e computador</li>
+            <li>✓ Testar link do WhatsApp</li>
+            <li>✓ Testar link do e-mail</li>
+            <li>✓ Compartilhar URL com clientes</li>
+            <li>✓ Adicionar nos cartões de visita</li>
+            <li>✓ Divulgar nas redes sociais</li>
+        </ul>
+
+        <div class="success">
+            <strong>🎉 Seu site estará acessível no mundo todo!</strong><br>
+            Qualquer pessoa poderá acessar pelo celular, tablet ou computador.
+        </div>
+
+        <h2>🆘 Problemas?</h2>
+        <p>Consulte o arquivo <code>DEPLOY.md</code> para soluções detalhadas.</p>
+    </div>
+</body>
+</html>
