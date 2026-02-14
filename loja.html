@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Loja TPoll - Produtos e acessórios com ofertas especiais.">
+    <title>Loja TPoll</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="loja.css">
+</head>
+<body>
+    <header class="store-header">
+        <div class="store-header-content">
+            <a href="index.html" class="back-link">← Voltar para o site</a>
+            <h1>🛍️ Loja TPoll</h1>
+            <p>Produtos disponíveis, promoções e gestão rápida da sua vitrine.</p>
+        </div>
+    </header>
+
+    <main class="store-main">
+        <section class="store-controls">
+            <input type="text" id="storeSearch" class="store-input" placeholder="Buscar produto...">
+            <select id="storeCategoryFilter" class="store-input">
+                <option value="all">Todas as categorias</option>
+            </select>
+            <button type="button" id="openStoreAdmin" class="store-btn store-btn-primary">Modo Admin</button>
+        </section>
+
+        <section>
+            <div id="storeProducts" class="store-grid"></div>
+            <p id="storeEmpty" class="store-empty" hidden>Nenhum item encontrado no momento.</p>
+        </section>
+
+        <section id="storeAdminPanel" class="store-admin-panel" hidden>
+            <h2>Painel da Loja</h2>
+            <p class="store-admin-note">Cadastre, edite, remova itens e marque promoções.</p>
+
+            <form id="storeLoginForm" class="store-login-form">
+                <input type="password" id="storeAdminPassword" class="store-input" placeholder="Senha do admin">
+                <button type="submit" class="store-btn store-btn-primary">Entrar</button>
+                <button type="button" id="storeAdminLogout" class="store-btn store-btn-secondary" hidden>Sair</button>
+            </form>
+
+            <div id="storeAdminContent" hidden>
+                <form id="storeProductForm" class="store-product-form">
+                    <input type="hidden" id="storeProductId">
+
+                    <div class="store-form-grid">
+                        <input type="text" id="productName" class="store-input" placeholder="Nome do produto" required>
+                        <input type="text" id="productCategory" class="store-input" placeholder="Categoria (ex: Capinhas)">
+                        <input type="number" id="productPrice" class="store-input" placeholder="Preço normal" min="0" step="0.01" required>
+                        <input type="number" id="productPromoPrice" class="store-input" placeholder="Preço promocional" min="0" step="0.01">
+                        <input type="number" id="productStock" class="store-input" placeholder="Estoque" min="0" step="1" value="1">
+                        <input type="url" id="productImage" class="store-input" placeholder="URL da imagem (opcional)">
+                    </div>
+
+                    <textarea id="productDescription" class="store-input" placeholder="Descrição do item" rows="3"></textarea>
+
+                    <div class="store-form-flags">
+                        <label><input type="checkbox" id="productOnSale"> Em promoção</label>
+                        <label><input type="checkbox" id="productActive" checked> Item ativo</label>
+                    </div>
+
+                    <div class="store-form-actions">
+                        <button type="submit" class="store-btn store-btn-primary">Salvar item</button>
+                        <button type="button" id="clearProductForm" class="store-btn store-btn-secondary">Limpar</button>
+                    </div>
+                </form>
+
+                <div id="storeAdminList" class="store-admin-list"></div>
+            </div>
+        </section>
+    </main>
+
+    <script src="loja.js"></script>
+</body>
+</html>
