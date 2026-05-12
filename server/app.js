@@ -3,6 +3,8 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const authRoutes = require('./modules/auth/routes/authRoutes');
+const { verifyUserToken } = require('./modules/auth/services/authService');
+const activityService = require('./modules/auth/services/activityService');
 
 const app = express();
 
@@ -277,6 +279,18 @@ app.use((req, res, next) => {
 
 app.use(express.json({ limit: '1mb' }));
 
+app.use((req, res, next) => {
+  try {
+    const cookies = parseCookies(req);
+    const token = cookies.tpoll_auth_token;
+    const authUser = verifyUserToken(token);
+    activityService.trackVisit(req, authUser);
+  } catch {
+    // no-op
+  }
+  next();
+});
+
 app.get('/api/health', (req, res) => {
   res.json({ ok: true });
 });
@@ -405,14 +419,18 @@ app.use(express.static(path.join(__dirname, '..')));
 
 // ── Auth page routes ──────────────────────────────────────────────────────
 const authPages = {
-  '/login':               'login.html',
-  '/cadastro':            'cadastro.html',
-  '/esqueci-minha-senha': 'esqueci-minha-senha.html',
-  '/redefinir-senha':     'redefinir-senha.html'
+  '/login':               ['modules', 'auth', 'pages', 'Login.html'],
+  '/cadastro':            ['modules', 'auth', 'pages', 'Register.html'],
+  '/esqueci-minha-senha': ['modules', 'auth', 'pages', 'ForgotPassword.html'],
+  '/redefinir-senha':     ['modules', 'auth', 'pages', 'ResetPassword.html']
 };
 
-Object.entries(authPages).forEach(([route, file]) => {
-  app.get(route, (req, res) => res.sendFile(path.join(__dirname, '..', file)));
+Object.entries(authPages).forEach(([route, fileParts]) => {
+  app.get(route, (req, res) => res.sendFile(path.join(__dirname, ...fileParts)));
+});
+
+app.get('/painel-admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'modules', 'auth', 'pages', 'AdminPanel.html'));
 });
 
 app.get('*', (req, res) => {

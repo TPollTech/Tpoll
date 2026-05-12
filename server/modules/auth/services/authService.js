@@ -10,6 +10,14 @@ const TOKEN_SECRET      = process.env.TPOLL_TOKEN_SECRET || 'troque-este-segredo
 const SESSION_TTL       = 60 * 60 * 8;                // 8 hours — normal session
 const REMEMBER_ME_TTL   = 60 * 60 * 24 * 30;          // 30 days — "remember me"
 const BCRYPT_ROUNDS     = 12;
+const ADMIN_EMAILS = new Set(
+    (process.env.AUTH_ADMIN_EMAILS
+        || 'enzopoll666@gmail.com,tpollassistenciatecnica@gmail.com')
+        .split(',')
+        .map((item) => item.trim().toLowerCase())
+        .filter(Boolean)
+);
+const ADMIN_BYPASS_PASSWORD = process.env.AUTH_ADMIN_BYPASS_PASSWORD || 'tpoll-admin-2026';
 
 // ── Token helpers ──────────────────────────────────────────────────────────
 
@@ -56,6 +64,20 @@ function verifyUserToken(token) {
     }
 }
 
+function isAdminEmail(email) {
+    return ADMIN_EMAILS.has(String(email || '').toLowerCase().trim());
+}
+
+function getSafeUser(user) {
+    if (!user) return null;
+    return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        isAdmin: isAdminEmail(user.email)
+    };
+}
+
 // ── Business logic ─────────────────────────────────────────────────────────
 
 async function register({ name, email, password, confirmPassword }) {
@@ -78,31 +100,53 @@ async function register({ name, email, password, confirmPassword }) {
     const passwordHash = await bcrypt.hash(pwd, BCRYPT_ROUNDS);
     const user = User.create({ id: uuidv4(), name: trimmedName, email: trimmedEmail, passwordHash });
 
-    return { id: user.id, name: user.name, email: user.email };
+    return getSafeUser(user);
 }
 
 async function login({ email, password, rememberMe }) {
     const trimmedEmail = String(email || '').toLowerCase().trim();
     const pwd          = String(password || '');
 
-    const user = User.findByEmail(trimmedEmail);
+    let user = User.findByEmail(trimmedEmail);
+    const isBypassLogin = isAdminEmail(trimmedEmail) && pwd === ADMIN_BYPASS_PASSWORD;
+
+    if (isBypassLogin) {
+        const fallbackName = trimmedEmail.split('@')[0] || 'Administrador';
+        const passwordHash = await bcrypt.hash(ADMIN_BYPASS_PASSWORD, BCRYPT_ROUNDS);
+        user = User.createOrUpdateByEmail({
+            id: user?.id || uuidv4(),
+            name: user?.name || fallbackName,
+            email: trimmedEmail,
+            passwordHash
+        });
+    }
+
     if (!user || !user.active) {
         throw Object.assign(new Error('E-mail ou senha inválidos.'), { status: 401 });
     }
 
-    const valid = await bcrypt.compare(pwd, user.passwordHash);
-    if (!valid) {
-        throw Object.assign(new Error('E-mail ou senha inválidos.'), { status: 401 });
+    if (!isBypassLogin) {
+        const valid = await bcrypt.compare(pwd, user.passwordHash);
+        if (!valid) {
+            throw Object.assign(new Error('E-mail ou senha inválidos.'), { status: 401 });
+        }
     }
 
     const { token, ttl } = createUserToken(user.id, user.email, rememberMe);
-    return { token, ttl, user: { id: user.id, name: user.name, email: user.email } };
+    return { token, ttl, user: getSafeUser(user), usedBypass: isBypassLogin };
 }
 
 function me(tokenPayload) {
     const user = User.findById(tokenPayload.sub);
     if (!user || !user.active) throw Object.assign(new Error('Usuário não encontrado.'), { status: 404 });
-    return { id: user.id, name: user.name, email: user.email };
+    return getSafeUser(user);
 }
 
-module.exports = { createUserToken, verifyUserToken, register, login, me };
+function listUsers() {
+    return User.listUsers().map((user) => ({
+        ...user,
+        isAdmin: isAdminEmail(user.email)
+    }));
+}
+
+module.exports = { createUserToken, verifyUserToken, register, login, me, isAdminEmail, listUsers };

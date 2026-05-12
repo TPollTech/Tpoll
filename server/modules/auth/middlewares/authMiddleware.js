@@ -3,6 +3,7 @@
 
 const { verifyUserToken } = require('../services/authService');
 const { extractTokenFromRequest } = require('../controllers/authController');
+const authService = require('../services/authService');
 
 /**
  * requireAuth — blocks the request with 401 if token is missing or invalid.
@@ -30,4 +31,20 @@ function optionalAuth(req, res, next) {
     return next();
 }
 
-module.exports = { requireAuth, optionalAuth };
+function requireAdminAuth(req, res, next) {
+    const token = extractTokenFromRequest(req);
+    const payload = verifyUserToken(token);
+
+    if (!payload) {
+        return res.status(401).json({ error: 'Não autenticado. Faça login para continuar.' });
+    }
+
+    if (!authService.isAdminEmail(payload.email)) {
+        return res.status(403).json({ error: 'Acesso restrito aos administradores.' });
+    }
+
+    req.authUser = payload;
+    return next();
+}
+
+module.exports = { requireAuth, optionalAuth, requireAdminAuth };

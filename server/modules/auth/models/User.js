@@ -63,4 +63,41 @@ function updatePassword(id, passwordHash) {
     return true;
 }
 
-module.exports = { findByEmail, findById, create, updatePassword };
+function listUsers() {
+    return readAll().map((user) => ({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        createdAt: user.createdAt,
+        active: Boolean(user.active)
+    }));
+}
+
+function createOrUpdateByEmail({ id, name, email, passwordHash }) {
+    const users = readAll();
+    const normalizedEmail = String(email || '').toLowerCase().trim();
+    const index = users.findIndex((u) => u.email === normalizedEmail);
+
+    if (index >= 0) {
+        if (passwordHash) users[index].passwordHash = passwordHash;
+        if (name) users[index].name = String(name).trim().slice(0, 100);
+        users[index].active = true;
+        users[index].updatedAt = new Date().toISOString();
+        writeAll(users);
+        return users[index];
+    }
+
+    const user = {
+        id,
+        name: String(name || '').trim().slice(0, 100),
+        email: normalizedEmail,
+        passwordHash,
+        createdAt: new Date().toISOString(),
+        active: true
+    };
+    users.push(user);
+    writeAll(users);
+    return user;
+}
+
+module.exports = { findByEmail, findById, create, updatePassword, listUsers, createOrUpdateByEmail };

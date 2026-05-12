@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Admin Auth — TPoll</title>
+  <style>
+    body { font-family: Inter, Arial, sans-serif; margin: 0; background: #f4f6f8; color: #1f2937; }
+    header { background: #111827; color: #fff; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; }
+    .wrap { max-width: 1100px; margin: 20px auto; padding: 0 16px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .card { background: #fff; border-radius: 10px; padding: 14px; box-shadow: 0 2px 10px rgba(0,0,0,.08); }
+    h1, h2 { margin: 0 0 10px; }
+    h1 { font-size: 18px; }
+    h2 { font-size: 16px; }
+    button { background: #0ea5a8; color: #fff; border: 0; border-radius: 8px; padding: 8px 12px; cursor: pointer; }
+    button.secondary { background: #374151; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 8px; border-bottom: 1px solid #e5e7eb; text-align: left; vertical-align: top; }
+    .muted { color: #6b7280; font-size: 13px; }
+    .tag { display: inline-block; padding: 2px 8px; border-radius: 999px; background: #eef2ff; color: #4338ca; font-size: 11px; }
+    .hidden { display: none; }
+    @media (max-width: 900px) { .row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Painel de movimentação (Auth)</h1>
+    <div>
+      <button id="refreshBtn">Atualizar</button>
+      <button id="logoutBtn" class="secondary">Sair</button>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <p id="status" class="muted">Carregando...</p>
+
+    <div class="row">
+      <section class="card">
+        <h2>Contas criadas</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>E-mail</th>
+              <th>Admin</th>
+              <th>Criado em</th>
+            </tr>
+          </thead>
+          <tbody id="usersBody"></tbody>
+        </table>
+      </section>
+
+      <section class="card">
+        <h2>Movimentação recente</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Quando</th>
+              <th>Tipo</th>
+              <th>E-mail</th>
+              <th>Página</th>
+              <th>IP</th>
+            </tr>
+          </thead>
+          <tbody id="logsBody"></tbody>
+        </table>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const usersBody = document.getElementById('usersBody');
+    const logsBody = document.getElementById('logsBody');
+    const statusEl = document.getElementById('status');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    function esc(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function fmtDate(iso) {
+      if (!iso) return '-';
+      const d = new Date(iso);
+      return Number.isNaN(d.getTime()) ? '-' : d.toLocaleString('pt-BR');
+    }
+
+    async function loadData() {
+      statusEl.textContent = 'Atualizando...';
+
+      const meRes = await fetch('/auth/me', { credentials: 'include' });
+      if (!meRes.ok) {
+        location.href = '/login?next=/painel-admin';
+        return;
+      }
+
+      const meData = await meRes.json();
+      if (!meData.user || !meData.user.isAdmin) {
+        statusEl.textContent = 'Acesso restrito aos administradores.';
+        usersBody.innerHTML = '';
+        logsBody.innerHTML = '';
+        return;
+      }
+
+      const res = await fetch('/auth/admin/activity?limit=300', { credentials: 'include' });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        statusEl.textContent = data.error || 'Falha ao carregar dados.';
+        return;
+      }
+
+      const users = Array.isArray(data.users) ? data.users : [];
+      const logs = Array.isArray(data.logs) ? data.logs : [];
+
+      usersBody.innerHTML = users.length
+        ? users.map((u) => `
+            <tr>
+              <td>${esc(u.name || '-')}</td>
+              <td>${esc(u.email || '-')}</td>
+              <td>${u.isAdmin ? '<span class="tag">Sim</span>' : 'Não'}</td>
+              <td>${esc(fmtDate(u.createdAt))}</td>
+            </tr>
+          `).join('')
+        : '<tr><td colspan="4">Sem usuários cadastrados.</td></tr>';
+
+      logsBody.innerHTML = logs.length
+        ? logs.map((log) => `
+            <tr>
+              <td>${esc(fmtDate(log.ts))}</td>
+              <td>${esc(log.type || '-')}</td>
+              <td>${esc(log.email || '-')}</td>
+              <td>${esc(log.page || log.path || '-')}</td>
+              <td>${esc(log.ip || '-')}</td>
+            </tr>
+          `).join('')
+        : '<tr><td colspan="5">Sem movimentação registrada ainda.</td></tr>';
+
+      statusEl.textContent = `Logado como ${meData.user.email} • ${logs.length} eventos exibidos`;
+    }
+
+    refreshBtn.addEventListener('click', () => {
+      loadData().catch(() => { statusEl.textContent = 'Erro ao atualizar painel.'; });
+    });
+
+    logoutBtn.addEventListener('click', async () => {
+      await fetch('/auth/logout', { method: 'POST', credentials: 'include' });
+      location.href = '/login';
+    });
+
+    loadData().catch(() => { statusEl.textContent = 'Erro ao carregar painel.'; });
+  </script>
+</body>
+</html>

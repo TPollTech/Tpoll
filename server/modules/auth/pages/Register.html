@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar conta — TPoll Tech</title>
+    <link rel="icon" type="image/png" href="TPoll%20Logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', Arial, sans-serif; background: #f0f2f5; min-height: 100vh; display: flex; flex-direction: column; }
+        a { color: #00BDAE; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        .auth-header { background: #1a1a2e; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+        .auth-header img { height: 36px; }
+        .auth-header span { color: #fff; font-weight: 700; font-size: 18px; letter-spacing: .5px; }
+
+        .auth-main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 16px; }
+
+        .auth-card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,.08);
+            padding: 40px 36px;
+            width: 100%;
+            max-width: 420px;
+        }
+        .auth-card h1 { font-size: 22px; color: #1a1a2e; margin-bottom: 6px; }
+        .auth-card .subtitle { font-size: 14px; color: #777; margin-bottom: 28px; }
+
+        .field { margin-bottom: 18px; }
+        .field label { display: block; font-size: 13px; font-weight: 600; color: #444; margin-bottom: 6px; }
+        .field input {
+            width: 100%; padding: 11px 14px; border: 1.5px solid #d1d5db; border-radius: 8px;
+            font-size: 15px; font-family: inherit; transition: border-color .2s; outline: none;
+        }
+        .field input:focus { border-color: #00BDAE; }
+        .field .hint { font-size: 12px; color: #999; margin-top: 4px; }
+
+        .btn-primary {
+            width: 100%; padding: 13px; background: #00BDAE; color: #fff;
+            border: none; border-radius: 8px; font-size: 15px; font-weight: 600;
+            cursor: pointer; transition: background .2s; margin-top: 6px;
+        }
+        .btn-primary:hover { background: #009d90; }
+        .btn-primary:disabled { background: #a0e0da; cursor: default; }
+
+        .divider { text-align: center; color: #aaa; font-size: 13px; margin: 22px 0; position: relative; }
+        .divider::before, .divider::after { content: ''; position: absolute; top: 50%; width: 40%; height: 1px; background: #e5e7eb; }
+        .divider::before { left: 0; }
+        .divider::after { right: 0; }
+
+        .link-row { text-align: center; font-size: 14px; color: #555; }
+
+        .alert { display: none; padding: 12px 16px; border-radius: 8px; font-size: 14px; margin-bottom: 18px; }
+        .alert-error { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+        .alert-success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+    </style>
+</head>
+<body>
+    <header class="auth-header">
+        <a href="index.html"><img src="TPoll%20Logo.png" alt="TPoll Logo"></a>
+        <span>TPoll Tech</span>
+    </header>
+
+    <main class="auth-main">
+        <div class="auth-card">
+            <h1>Criar conta</h1>
+            <p class="subtitle">Cadastre-se gratuitamente</p>
+
+            <div id="alertBox" class="alert"></div>
+
+            <form id="registerForm" novalidate>
+                <div class="field">
+                    <label for="name">Nome completo</label>
+                    <input type="text" id="name" name="name" placeholder="Seu nome" autocomplete="name" required>
+                </div>
+
+                <div class="field">
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" name="email" placeholder="seu@email.com" autocomplete="email" required>
+                </div>
+
+                <div class="field">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="new-password" required minlength="8">
+                    <span class="hint">Mínimo de 8 caracteres</span>
+                </div>
+
+                <div class="field">
+                    <label for="confirmPassword">Confirmar senha</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="••••••••" autocomplete="new-password" required>
+                </div>
+
+                <button type="submit" class="btn-primary" id="submitBtn">Criar conta</button>
+            </form>
+
+            <div class="divider">ou</div>
+            <p class="link-row">Já tem conta? <a href="/login">Entrar</a></p>
+        </div>
+    </main>
+
+    <script>
+        const form      = document.getElementById('registerForm');
+        const alertBox  = document.getElementById('alertBox');
+        const submitBtn = document.getElementById('submitBtn');
+
+        function showAlert(message, type) {
+            alertBox.textContent = message;
+            alertBox.className = `alert alert-${type}`;
+            alertBox.style.display = 'block';
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            alertBox.style.display = 'none';
+
+            const password        = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (password !== confirmPassword) {
+                showAlert('As senhas não coincidem.', 'error');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Criando conta…';
+
+            try {
+                const response = await fetch('/auth/register', {
+                    method:  'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name:            document.getElementById('name').value.trim(),
+                        email:           document.getElementById('email').value.trim(),
+                        password,
+                        confirmPassword
+                    })
+                });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    showAlert(data.error || 'Erro ao criar conta.', 'error');
+                    return;
+                }
+
+                showAlert('Conta criada com sucesso! Redirecionando para o login…', 'success');
+                setTimeout(() => { location.href = '/login'; }, 2000);
+            } catch {
+                showAlert('Erro de conexão. Tente novamente.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Criar conta';
+            }
+        });
+    </script>
+</body>
+</html>

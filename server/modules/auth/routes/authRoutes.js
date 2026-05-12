@@ -3,7 +3,7 @@
 
 const express    = require('express');
 const controller = require('../controllers/authController');
-const { requireAuth } = require('../middlewares/authMiddleware');
+const { requireAuth, requireAdminAuth } = require('../middlewares/authMiddleware');
 
 const router = express.Router();
 
@@ -24,5 +24,8 @@ router.post('/reset-password',  controller.resetPassword);
 
 // GET  /auth/me   (protected)
 router.get('/me',               requireAuth, controller.me);
+
+// GET /auth/admin/activity (admin only)
+router.get('/admin/activity',   requireAdminAuth, controller.adminActivity);
 
 module.exports = router;
