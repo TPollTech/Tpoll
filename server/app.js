@@ -2,6 +2,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const authRoutes = require('./modules/auth/routes/authRoutes');
 
 const app = express();
 
@@ -280,6 +281,25 @@ app.get('/api/health', (req, res) => {
   res.json({ ok: true });
 });
 
+// ── Auth module ───────────────────────────────────────────────────────────
+
+// Rate-limit auth endpoints to prevent brute-force attacks
+app.use('/auth', (req, res, next) => {
+  const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown')
+    .replace('::ffff:', '').split(',')[0].trim();
+
+  const sensitiveRoutes = ['/login', '/register', '/forgot-password', '/reset-password'];
+  const isSensitive = sensitiveRoutes.some((r) => req.path === r && req.method === 'POST');
+
+  if (isSensitive && !enforceRateLimit(`auth:${ip}`, 20, 10 * 60 * 1000)) {
+    return res.status(429).json({ error: 'Muitas tentativas. Tente novamente em alguns minutos.' });
+  }
+
+  return next();
+});
+
+app.use('/auth', authRoutes);
+
 app.get('/api/store/products', (req, res) => {
   const products = readProducts().filter((product) => product.active);
   res.json(products);
@@ -382,6 +402,18 @@ app.delete('/api/admin/products/:id', requireSameOrigin, requireLocalAdmin, (req
 });
 
 app.use(express.static(path.join(__dirname, '..')));
+
+// ── Auth page routes ──────────────────────────────────────────────────────
+const authPages = {
+  '/login':               'login.html',
+  '/cadastro':            'cadastro.html',
+  '/esqueci-minha-senha': 'esqueci-minha-senha.html',
+  '/redefinir-senha':     'redefinir-senha.html'
+};
+
+Object.entries(authPages).forEach(([route, file]) => {
+  app.get(route, (req, res) => res.sendFile(path.join(__dirname, '..', file)));
+});
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'index.html'));

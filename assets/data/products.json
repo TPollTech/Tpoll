@@ -108,7 +108,7 @@
     "promoPrice": 0
   },
   {
-    "image": "",
+    "image": "assets/fotos-produtos/aplicadas/produto-10-adaptador-hdmi-displayport.png",
     "stock": 1,
     "id": "10",
     "price": 25,
@@ -120,7 +120,7 @@
     "promoPrice": 0
   },
   {
-    "image": "",
+    "image": "assets/fotos-produtos/aplicadas/produto-11-adaptador-de-som-usb.png",
     "stock": 1,
     "id": "11",
     "price": 30,
@@ -132,7 +132,7 @@
     "promoPrice": 0
   },
   {
-    "image": "",
+    "image": "assets/fotos-produtos/aplicadas/produto-12-adaptador-displayport-vga.png",
     "stock": 1,
     "id": "12",
     "price": 30,
@@ -144,7 +144,7 @@
     "promoPrice": 0
   },
   {
-    "image": "",
+    "image": "assets/fotos-produtos/aplicadas/produto-13-carregador-veicular.png",
     "stock": 4,
     "id": "13",
     "price": 16,
@@ -156,7 +156,7 @@
     "promoPrice": 0
   },
   {
-    "image": "",
+    "image": "assets/fotos-produtos/aplicadas/produto-14-adaptador-hdmi-dvi.png",
     "stock": 2,
     "id": "14",
     "price": 15,
@@ -168,7 +168,7 @@
     "promoPrice": 0
   },
   {
-    "image": "",
+    "image": "assets/fotos-produtos/aplicadas/produto-15-powerbank-10000.png",
     "stock": 1,
     "id": "15",
     "price": 120,
@@ -180,7 +180,7 @@
     "promoPrice": 0
   },
   {
-    "image": "",
+    "image": "assets/fotos-produtos/aplicadas/produto-16-cabo-tipo-c-tipo-c.png",
     "stock": 3,
     "id": "16",
     "price": 30,
@@ -192,7 +192,7 @@
     "promoPrice": 0
   },
   {
-    "image": "",
+    "image": "assets/fotos-produtos/aplicadas/produto-17-cabo-tipo-c-lightning.png",
     "stock": 1,
     "id": "17",
     "price": 30,
@@ -204,7 +204,7 @@
     "promoPrice": 0
   },
   {
-    "image": "",
+    "image": "assets/fotos-produtos/aplicadas/produto-18-cabo-micro-usb.png",
     "stock": 21,
     "id": "18",
     "price": 24,
@@ -216,7 +216,7 @@
     "promoPrice": 0
   },
   {
-    "image": "",
+    "image": "assets/fotos-produtos/aplicadas/produto-19-cabo-tipo-c.png",
     "stock": 12,
     "id": "19",
     "price": 24,
