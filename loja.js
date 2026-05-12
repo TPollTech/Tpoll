@@ -237,6 +237,22 @@ function buildStoreCategoryOptions() {
     }
 }
 
+// ── WhatsApp direct contact ────────────────────────────────────────────────
+
+function openProductOnWhatsApp(product) {
+    const finalPrice = product.onSale && product.promoPrice > 0 ? product.promoPrice : product.price;
+    const message = [
+        'Olá! Tenho interesse neste item da loja TPoll:',
+        '',
+        `*Produto:* ${product.name}`,
+        `*Preço:* ${formatMoneyBRL(finalPrice)}`,
+        `*Categoria:* ${product.category || 'Geral'}`,
+        '',
+        'Pode me passar mais detalhes?'
+    ].join('\n');
+    window.open(`https://wa.me/5555996765404?text=${encodeURIComponent(message)}`, '_blank');
+}
+
 // ── PIX Payment ─────────────────────────────────────────────────────────────
 
 const PIX_KEY        = '51570488000123';
@@ -351,9 +367,7 @@ function openPixModal(product) {
     document.body.style.overflow = 'hidden';
 }
 
-function openProductOnWhatsApp(product) {
-    openPixModal(product);
-}
+
 
 function createProductCard(product) {
     const card = document.createElement('article');
@@ -381,7 +395,10 @@ function createProductCard(product) {
             <p class="store-card-description">${safeDescription}</p>
             ${priceMarkup}
             <p class="store-card-stock">Estoque: ${Math.max(0, parseInt(product.stock || 0, 10))}</p>
-            <button type="button" class="store-buy-btn">Comprar pelo WhatsApp</button>
+            <div class="store-card-actions">
+                <button type="button" class="store-buy-btn">WhatsApp</button>
+                <button type="button" class="store-pix-btn">Pagar no PIX</button>
+            </div>
         </div>
     `;
 
@@ -395,6 +412,11 @@ function createProductCard(product) {
     const buyButton = card.querySelector('.store-buy-btn');
     if (buyButton) {
         buyButton.addEventListener('click', () => openProductOnWhatsApp(product));
+    }
+
+    const pixButton = card.querySelector('.store-pix-btn');
+    if (pixButton) {
+        pixButton.addEventListener('click', () => openPixModal(product));
     }
 
     return card;
