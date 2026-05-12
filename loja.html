@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="loja.css">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 </head>
 <body>
     <header class="store-header">
@@ -87,6 +88,54 @@
             </div>
         </section>
     </main>
+
+    <!-- Modal de pagamento PIX -->
+    <div id="pixModal" class="pix-modal-overlay" hidden aria-modal="true" role="dialog" aria-labelledby="pixModalTitle">
+        <div class="pix-modal">
+            <button type="button" class="pix-modal-close" id="pixModalClose" aria-label="Fechar">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+
+            <div class="pix-modal-header">
+                <div class="pix-logo-badge">
+                    <svg viewBox="0 0 512 512" width="32" height="32"><path fill="#00BDAE" d="M392.4 345.5c-19.8 0-38.4-7.7-52.4-21.7l-74.6-74.6c-5.3-5.3-14.5-5.3-19.8 0l-74.9 74.9c-14 14-32.6 21.7-52.4 21.7h-14.8l94.4 94.4c29 29 76.1 29 105.1 0l94.7-94.7h-5.3zM118.3 166.5c19.8 0 38.4 7.7 52.4 21.7l74.9 74.9c5.5 5.5 14.3 5.5 19.8 0l74.6-74.6c14-14 32.6-21.7 52.4-21.7h5.3L302.9 71.8c-29-29-76.1-29-105.1 0l-94.4 94.4 14.9-.7z"/><path fill="#00BDAE" d="M456.8 197.1l-65.1-65.1h-5.3l.1-.1c-13.2 0-26.3 5-36.4 15L275.5 221c-11 11-25.6 17-41.2 17-15.6 0-30.2-5.9-41.2-17l-74.9-74.9c-10.1-10.1-23.2-15-36.4-15L55.2 197.1c-29 29-29 76.1 0 105.1l65.1 65.1c13.2 0 26.3-5 36.4-15l74.9-74.9c11-11 25.6-17 41.2-17 15.6 0 30.2 5.9 41.2 17L388.6 352c10.1 10.1 23.2 15 36.4 15l65.1-65.1c28.3-29 28.3-76.1-33.3-104.8z"/></svg>
+                </div>
+                <div>
+                    <h2 id="pixModalTitle" class="pix-modal-title">Pagar com PIX</h2>
+                    <p class="pix-modal-subtitle">Escaneie o QR Code ou copie a chave</p>
+                </div>
+            </div>
+
+            <div class="pix-product-info">
+                <span id="pixProductName" class="pix-product-name"></span>
+                <span id="pixProductPrice" class="pix-product-price"></span>
+            </div>
+
+            <div class="pix-qr-wrapper">
+                <canvas id="pixQrCanvas"></canvas>
+                <p class="pix-qr-hint">Abra o app do banco → PIX → Ler QR Code</p>
+            </div>
+
+            <div class="pix-key-row">
+                <div class="pix-key-label">Chave PIX (CNPJ)</div>
+                <div class="pix-key-copy">
+                    <span id="pixKeyText" class="pix-key-value">51.570.488/0001-23</span>
+                    <button type="button" id="pixCopyBtn" class="pix-copy-btn" aria-label="Copiar chave PIX">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                        <span id="pixCopyLabel">Copiar</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="pix-actions">
+                <button type="button" id="pixConfirmWhatsApp" class="pix-btn-whatsapp">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.99 2h-.008C6.465 2 2 6.476 2 12.001c0 1.932.525 3.74 1.432 5.291L2 22l4.82-1.409A9.944 9.944 0 0012 22c5.523 0 10-4.478 10-10C22 6.476 17.524 2 11.99 2z"/></svg>
+                    Paguei! Avisar pelo WhatsApp
+                </button>
+                <button type="button" id="pixModalClose2" class="pix-btn-close">Fechar</button>
+            </div>
+        </div>
+    </div>
 
     <script src="loja.js"></script>
 </body>

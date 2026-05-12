@@ -446,3 +446,253 @@ body {
         gap: 8px;
     }
 }
+
+/* ── PIX Modal ─────────────────────────────────────────────────────────────── */
+
+.pix-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(8, 17, 29, 0.72);
+    backdrop-filter: blur(6px);
+    z-index: 9000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    animation: pixFadeIn 0.2s ease;
+}
+
+.pix-modal-overlay[hidden] {
+    display: none;
+}
+
+@keyframes pixFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.pix-modal {
+    background: #fff;
+    border-radius: 24px;
+    padding: 32px 28px 28px;
+    max-width: 420px;
+    width: 100%;
+    position: relative;
+    box-shadow: 0 32px 80px rgba(8, 17, 29, 0.28), 0 0 0 1px rgba(0,189,174,0.18);
+    animation: pixSlideUp 0.25s ease;
+}
+
+@keyframes pixSlideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+}
+
+.pix-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: #f3f6f9;
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #4b5563;
+    transition: background 0.2s;
+}
+
+.pix-modal-close:hover {
+    background: #e3eaf0;
+    color: #111;
+}
+
+.pix-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.pix-logo-badge {
+    width: 54px;
+    height: 54px;
+    background: linear-gradient(135deg, rgba(0,189,174,0.12), rgba(0,189,174,0.22));
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.pix-modal-title {
+    margin: 0 0 4px;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #0d2234;
+}
+
+.pix-modal-subtitle {
+    margin: 0;
+    font-size: 0.88rem;
+    color: #6b7280;
+}
+
+.pix-product-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f3f6f9;
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 22px;
+    gap: 12px;
+}
+
+.pix-product-name {
+    font-size: 0.93rem;
+    font-weight: 600;
+    color: #1f2937;
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pix-product-price {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #00BDAE;
+    white-space: nowrap;
+}
+
+.pix-qr-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.pix-qr-wrapper canvas {
+    border-radius: 16px;
+    border: 3px solid rgba(0,189,174,0.25);
+    display: block;
+}
+
+.pix-qr-hint {
+    margin: 0;
+    font-size: 0.82rem;
+    color: #9ca3af;
+    text-align: center;
+}
+
+.pix-key-row {
+    margin-bottom: 22px;
+}
+
+.pix-key-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+}
+
+.pix-key-copy {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f3f6f9;
+    border-radius: 10px;
+    padding: 10px 14px;
+}
+
+.pix-key-value {
+    flex: 1;
+    font-family: 'Courier New', monospace;
+    font-size: 0.97rem;
+    font-weight: 600;
+    color: #1f2937;
+    letter-spacing: 0.04em;
+}
+
+.pix-copy-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #00BDAE;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+}
+
+.pix-copy-btn:hover {
+    background: #009e91;
+}
+
+.pix-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.pix-btn-whatsapp {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: #25D366;
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    padding: 14px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    font-family: inherit;
+}
+
+.pix-btn-whatsapp:hover {
+    background: #1ebe5a;
+    transform: translateY(-1px);
+}
+
+.pix-btn-close {
+    background: transparent;
+    border: 2px solid #e3eaf0;
+    color: #6b7280;
+    border-radius: 14px;
+    padding: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    font-family: inherit;
+}
+
+.pix-btn-close:hover {
+    border-color: #c0cad4;
+    color: #374151;
+}
+
+@media (max-width: 460px) {
+    .pix-modal {
+        padding: 24px 18px 20px;
+    }
+
+    .pix-modal-title {
+        font-size: 1.15rem;
+    }
+}
