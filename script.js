@@ -421,9 +421,38 @@ async function loadStorePreview() {
     if (!grid) return;
 
     try {
-        const res = await fetch('/api/store/products');
-        if (!res.ok) throw new Error('API error');
-        const products = await res.json();
+        let products = null;
+
+        try {
+            const apiResponse = await fetch('/api/store/products', { cache: 'no-store' });
+            if (apiResponse.ok) {
+                const apiData = await apiResponse.json();
+                if (Array.isArray(apiData)) products = apiData;
+            }
+        } catch (apiError) {
+            // fallback estático abaixo
+        }
+
+        if (!products) {
+            const fallbackPaths = ['assets/data/products.json', 'server/store-data.json'];
+
+            for (const fallbackPath of fallbackPaths) {
+                try {
+                    const fallbackResponse = await fetch(fallbackPath, { cache: 'no-store' });
+                    if (!fallbackResponse.ok) continue;
+
+                    const fallbackData = await fallbackResponse.json();
+                    if (Array.isArray(fallbackData)) {
+                        products = fallbackData;
+                        break;
+                    }
+                } catch (fallbackError) {
+                    // tenta próximo fallback
+                }
+            }
+        }
+
+        if (!products) throw new Error('No data source available');
 
         const active = products.filter(p => p.active !== false).slice(0, 4);
         if (active.length === 0) {
