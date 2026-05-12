@@ -57,16 +57,33 @@ async function loadStoreProducts() {
         // fallback para ambientes estáticos (sem backend Node ativo)
     }
 
-    const fallbackResponse = await fetch('server/store-data.json', {
-        cache: 'no-store'
-    });
+    const fallbackCandidates = [
+        'assets/data/products.json',
+        'server/store-data.json'
+    ];
 
-    if (!fallbackResponse.ok) {
+    let loadedProducts = null;
+
+    for (const fallbackPath of fallbackCandidates) {
+        try {
+            const fallbackResponse = await fetch(fallbackPath, { cache: 'no-store' });
+            if (!fallbackResponse.ok) continue;
+
+            const fallbackData = await fallbackResponse.json();
+            if (Array.isArray(fallbackData)) {
+                loadedProducts = fallbackData;
+                break;
+            }
+        } catch (fallbackError) {
+            // tenta o próximo caminho de fallback
+        }
+    }
+
+    if (!loadedProducts) {
         throw new Error('Não foi possível carregar os produtos.');
     }
 
-    const fallbackData = await fallbackResponse.json();
-    storeProducts = Array.isArray(fallbackData) ? fallbackData : [];
+    storeProducts = loadedProducts;
 }
 
 function getFilteredProducts() {
