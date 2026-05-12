@@ -428,7 +428,7 @@
     "description": "Rádio USB portátil para reprodução e uso prático no dia a dia.",
     "name": "Rádio USB",
     "onSale": false,
-    "active": true,
+    "active": false,
     "promoPrice": 0
   },
   {
