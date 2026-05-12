@@ -42,7 +42,7 @@ async function apiRequest(url, options = {}) {
     const body = contentType.includes('application/json') ? await response.json() : null;
 
     if (!response.ok) {
-        const message = body?.error || 'Erro ao processar a solicitação.';
+        const message = (body && body.error) || 'Erro ao processar a solicitação.';
         throw new Error(message);
     }
 
@@ -53,7 +53,7 @@ async function loadStoreProducts() {
     try {
         storeProducts = await apiRequest('/api/store/products', { method: 'GET' });
         return;
-    } catch {
+    } catch (error) {
         // fallback para ambientes estáticos (sem backend Node ativo)
     }
 
@@ -70,8 +70,8 @@ async function loadStoreProducts() {
 }
 
 function getFilteredProducts() {
-    const query = (storeSearch?.value || '').trim().toLowerCase();
-    const category = storeCategoryFilter?.value || 'all';
+    const query = ((storeSearch && storeSearch.value) || '').trim().toLowerCase();
+    const category = (storeCategoryFilter && storeCategoryFilter.value) || 'all';
 
     return storeProducts.filter((product) => {
         if (!product.active) return false;
@@ -158,7 +158,9 @@ function createProductCard(product) {
     }
 
     const buyButton = card.querySelector('.store-buy-btn');
-    buyButton?.addEventListener('click', () => openProductOnWhatsApp(product));
+    if (buyButton) {
+        buyButton.addEventListener('click', () => openProductOnWhatsApp(product));
+    }
 
     return card;
 }
@@ -281,7 +283,7 @@ if (storeAdminLogout) {
     storeAdminLogout.addEventListener('click', async () => {
         try {
             await apiRequest('/api/admin/logout', { method: 'POST' });
-        } catch {
+        } catch (error) {
             // no-op
         }
         setAdminLoggedIn(false);
@@ -296,7 +298,7 @@ if (storeLoginForm) {
         try {
             await apiRequest('/api/admin/login', {
                 method: 'POST',
-                body: JSON.stringify({ password: (storeAdminPassword?.value || '').trim() })
+                body: JSON.stringify({ password: ((storeAdminPassword && storeAdminPassword.value) || '').trim() })
             });
 
             if (storeAdminPassword) storeAdminPassword.value = '';
@@ -312,17 +314,28 @@ if (storeProductForm) {
     storeProductForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
-        const id = document.getElementById('storeProductId')?.value || '';
+        const idInput = document.getElementById('storeProductId');
+        const nameInput = document.getElementById('productName');
+        const categoryInput = document.getElementById('productCategory');
+        const descriptionInput = document.getElementById('productDescription');
+        const priceInput = document.getElementById('productPrice');
+        const promoPriceInput = document.getElementById('productPromoPrice');
+        const stockInput = document.getElementById('productStock');
+        const imageInput = document.getElementById('productImage');
+        const onSaleInput = document.getElementById('productOnSale');
+        const activeInput = document.getElementById('productActive');
+
+        const id = (idInput && idInput.value) || '';
         const payload = {
-            name: document.getElementById('productName')?.value.trim() || '',
-            category: document.getElementById('productCategory')?.value.trim() || '',
-            description: document.getElementById('productDescription')?.value.trim() || '',
-            price: parseMoney(document.getElementById('productPrice')?.value || 0),
-            promoPrice: parseMoney(document.getElementById('productPromoPrice')?.value || 0),
-            stock: Math.max(0, parseInt(document.getElementById('productStock')?.value || '0', 10)),
-            image: document.getElementById('productImage')?.value.trim() || '',
-            onSale: Boolean(document.getElementById('productOnSale')?.checked),
-            active: Boolean(document.getElementById('productActive')?.checked)
+            name: (nameInput && nameInput.value ? nameInput.value.trim() : ''),
+            category: (categoryInput && categoryInput.value ? categoryInput.value.trim() : ''),
+            description: (descriptionInput && descriptionInput.value ? descriptionInput.value.trim() : ''),
+            price: parseMoney((priceInput && priceInput.value) || 0),
+            promoPrice: parseMoney((promoPriceInput && promoPriceInput.value) || 0),
+            stock: Math.max(0, parseInt((stockInput && stockInput.value) || '0', 10)),
+            image: (imageInput && imageInput.value ? imageInput.value.trim() : ''),
+            onSale: Boolean(onSaleInput && onSaleInput.checked),
+            active: Boolean(activeInput && activeInput.checked)
         };
 
         if (!payload.name) {
@@ -424,11 +437,11 @@ async function initStore() {
             setAdminLoggedIn(false);
             await reloadForPublic();
         }
-    } catch {
+    } catch (error) {
         setAdminLoggedIn(false);
         try {
             await reloadForPublic();
-        } catch {
+        } catch (reloadError) {
             if (storeProductsContainer) storeProductsContainer.innerHTML = '';
             if (storeEmpty) {
                 storeEmpty.textContent = 'Não foi possível carregar os produtos no momento.';
