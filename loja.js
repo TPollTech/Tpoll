@@ -14,6 +14,10 @@ const clearProductFormBtn = document.getElementById('clearProductForm');
 
 let storeProducts = [];
 
+const storeApi = (window.TPollStoreApi && typeof window.TPollStoreApi.apiRequest === 'function')
+    ? window.TPollStoreApi
+    : null;
+
 function parseMoney(value) {
     const numberValue = Number(value);
     return Number.isFinite(numberValue) ? numberValue : 0;
@@ -139,62 +143,12 @@ function isLocalClient() {
     return hostname === 'localhost' || hostname === '127.0.0.1';
 }
 
-async function apiRequest(url, options = {}) {
-    const response = await fetch(url, {
-        credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-            ...(options.headers || {})
-        },
-        ...options
-    });
-
-    const contentType = response.headers.get('content-type') || '';
-    const body = contentType.includes('application/json') ? await response.json() : null;
-
-    if (!response.ok) {
-        const message = (body && body.error) || 'Erro ao processar a solicitação.';
-        throw new Error(message);
-    }
-
-    return body;
-}
-
 async function loadStoreProducts() {
-    try {
-        storeProducts = await apiRequest('/api/store/products', { method: 'GET' });
-        return;
-    } catch (error) {
-        // fallback para ambientes estáticos (sem backend Node ativo)
+    if (!storeApi || typeof storeApi.loadStoreProducts !== 'function') {
+        throw new Error('Módulo de API indisponível.');
     }
 
-    const fallbackCandidates = [
-        'assets/data/products.json',
-        'server/store-data.json'
-    ];
-
-    let loadedProducts = null;
-
-    for (const fallbackPath of fallbackCandidates) {
-        try {
-            const fallbackResponse = await fetch(fallbackPath, { cache: 'no-store' });
-            if (!fallbackResponse.ok) continue;
-
-            const fallbackData = await fallbackResponse.json();
-            if (Array.isArray(fallbackData)) {
-                loadedProducts = fallbackData;
-                break;
-            }
-        } catch (fallbackError) {
-            // tenta o próximo caminho de fallback
-        }
-    }
-
-    if (!loadedProducts) {
-        throw new Error('Não foi possível carregar os produtos.');
-    }
-
-    storeProducts = loadedProducts;
+    storeProducts = await storeApi.loadStoreProducts();
 }
 
 function getFilteredProducts() {
@@ -427,7 +381,7 @@ function renderAdminList() {
 }
 
 async function reloadForAdmin() {
-    storeProducts = await apiRequest('/api/admin/products', { method: 'GET' });
+    storeProducts = await storeApi.apiRequest('/api/admin/products', { method: 'GET' });
     buildStoreCategoryOptions();
     renderStore();
     renderAdminList();
@@ -451,7 +405,7 @@ if (storeCategoryFilter) {
 if (storeAdminLogout) {
     storeAdminLogout.addEventListener('click', async () => {
         try {
-            await apiRequest('/api/admin/logout', { method: 'POST' });
+            await storeApi.apiRequest('/api/admin/logout', { method: 'POST' });
         } catch (error) {
             // no-op
         }
@@ -465,7 +419,7 @@ if (storeLoginForm) {
     storeLoginForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         try {
-            await apiRequest('/api/admin/login', {
+            await storeApi.apiRequest('/api/admin/login', {
                 method: 'POST',
                 body: JSON.stringify({ password: ((storeAdminPassword && storeAdminPassword.value) || '').trim() })
             });
@@ -519,12 +473,12 @@ if (storeProductForm) {
 
         try {
             if (id) {
-                await apiRequest(`/api/admin/products/${id}`, {
+                await storeApi.apiRequest(`/api/admin/products/${id}`, {
                     method: 'PUT',
                     body: JSON.stringify(payload)
                 });
             } else {
-                await apiRequest('/api/admin/products', {
+                await storeApi.apiRequest('/api/admin/products', {
                     method: 'POST',
                     body: JSON.stringify(payload)
                 });
@@ -559,7 +513,7 @@ if (storeAdminList) {
 
         try {
             if (action === 'toggle') {
-                await apiRequest(`/api/admin/products/${id}`, {
+                await storeApi.apiRequest(`/api/admin/products/${id}`, {
                     method: 'PUT',
                     body: JSON.stringify({ ...product, active: !product.active })
                 });
@@ -571,7 +525,7 @@ if (storeAdminList) {
                 const confirmed = window.confirm(`Remover "${product.name}" da loja?`);
                 if (!confirmed) return;
 
-                await apiRequest(`/api/admin/products/${id}`, {
+                await storeApi.apiRequest(`/api/admin/products/${id}`, {
                     method: 'DELETE'
                 });
 
@@ -588,8 +542,17 @@ async function initStore() {
     if (openStoreAdmin) openStoreAdmin.hidden = true;
     if (storeAdminPanel) storeAdminPanel.hidden = true;
 
+    if (!storeApi) {
+        if (storeProductsContainer) storeProductsContainer.innerHTML = '';
+        if (storeEmpty) {
+            storeEmpty.textContent = 'Não foi possível inicializar a loja (API indisponível).';
+            storeEmpty.hidden = false;
+        }
+        return;
+    }
+
     try {
-        const status = await apiRequest('/api/admin/status', { method: 'GET' });
+        const status = await storeApi.apiRequest('/api/admin/status', { method: 'GET' });
 
         if (isLocalClient() && status.adminEnabled && openStoreAdmin) {
             openStoreAdmin.hidden = false;
