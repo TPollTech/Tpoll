@@ -98,8 +98,9 @@
         const alertBox  = document.getElementById('alertBox');
         const submitBtn = document.getElementById('submitBtn');
         const tokenError = document.getElementById('tokenError');
+        const API_BASE  = window.TPOLL_AUTH_API_BASE || '';
+        const isGithubPages = location.hostname.includes('github.io');
 
-        // Extract token from URL query string
         const params = new URLSearchParams(location.search);
         const token  = params.get('token') || '';
 
@@ -112,6 +113,28 @@
             alertBox.textContent = message;
             alertBox.className = `alert alert-${type}`;
             alertBox.style.display = 'block';
+        }
+
+        function apiUrl(path) {
+            return `${API_BASE}${path}`;
+        }
+
+        async function parseJsonSafe(response) {
+            const contentType = (response.headers.get('content-type') || '').toLowerCase();
+            if (contentType.includes('application/json')) return response.json();
+            const text = await response.text();
+            if (/<!doctype html|<html/i.test(text)) {
+                throw new Error('API_UNAVAILABLE');
+            }
+            return { error: text || 'Resposta inválida do servidor.' };
+        }
+
+        function showBackendUnavailable() {
+            if (isGithubPages) {
+                showAlert('Redefinição de senha indisponível no GitHub Pages sem backend. Abra pelo servidor Node local (http://127.0.0.1:5500/redefinir-senha) ou configure TPOLL_AUTH_API_BASE.', 'error');
+                return;
+            }
+            showAlert('Servidor de autenticação indisponível no momento. Tente novamente em instantes.', 'error');
         }
 
         form.addEventListener('submit', async (e) => {
@@ -130,12 +153,12 @@
             submitBtn.textContent = 'Salvando…';
 
             try {
-                const response = await fetch('/auth/reset-password', {
+                const response = await fetch(apiUrl('/auth/reset-password'), {
                     method:  'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body:    JSON.stringify({ token, password, confirmPassword })
                 });
-                const data = await response.json();
+                const data = await parseJsonSafe(response);
 
                 if (!response.ok) {
                     showAlert(data.error || 'Erro ao redefinir senha.', 'error');
@@ -145,8 +168,12 @@
                 showAlert('Senha redefinida com sucesso. Faça login novamente.', 'success');
                 form.style.display = 'none';
                 setTimeout(() => { location.href = '/login'; }, 2500);
-            } catch {
-                showAlert('Erro de conexão. Tente novamente.', 'error');
+            } catch (error) {
+                if (String(error && error.message) === 'API_UNAVAILABLE') {
+                    showBackendUnavailable();
+                } else {
+                    showAlert('Erro de conexão. Tente novamente.', 'error');
+                }
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Redefinir senha';

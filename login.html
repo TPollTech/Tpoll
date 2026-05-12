@@ -107,11 +107,35 @@
         const form       = document.getElementById('loginForm');
         const alertBox   = document.getElementById('alertBox');
         const submitBtn  = document.getElementById('submitBtn');
+        const API_BASE   = window.TPOLL_AUTH_API_BASE || '';
+        const isGithubPages = location.hostname.includes('github.io');
 
         function showAlert(message, type) {
             alertBox.textContent = message;
             alertBox.className = `alert alert-${type}`;
             alertBox.style.display = 'block';
+        }
+
+        function apiUrl(path) {
+            return `${API_BASE}${path}`;
+        }
+
+        async function parseJsonSafe(response) {
+            const contentType = (response.headers.get('content-type') || '').toLowerCase();
+            if (contentType.includes('application/json')) return response.json();
+            const text = await response.text();
+            if (/<!doctype html|<html/i.test(text)) {
+                throw new Error('API_UNAVAILABLE');
+            }
+            return { error: text || 'Resposta inválida do servidor.' };
+        }
+
+        function showBackendUnavailable() {
+            if (isGithubPages) {
+                showAlert('Login indisponível no GitHub Pages sem backend. Abra pelo servidor Node local (http://127.0.0.1:5500/login) ou configure TPOLL_AUTH_API_BASE.', 'error');
+                return;
+            }
+            showAlert('Servidor de autenticação indisponível no momento. Tente novamente em instantes.', 'error');
         }
 
         form.addEventListener('submit', async (e) => {
@@ -125,13 +149,13 @@
             const rememberMe = document.getElementById('rememberMe').checked;
 
             try {
-                const response = await fetch('/auth/login', {
+                const response = await fetch(apiUrl('/auth/login'), {
                     method:      'POST',
                     headers:     { 'Content-Type': 'application/json' },
                     credentials: 'include',
                     body:        JSON.stringify({ email, password, rememberMe })
                 });
-                const data = await response.json();
+                const data = await parseJsonSafe(response);
 
                 if (!response.ok) {
                     showAlert(data.error || 'Erro ao entrar.', 'error');
@@ -140,8 +164,12 @@
 
                 const redirect = new URLSearchParams(location.search).get('next') || '/';
                 location.href = redirect;
-            } catch {
-                showAlert('Erro de conexão. Tente novamente.', 'error');
+            } catch (error) {
+                if (String(error && error.message) === 'API_UNAVAILABLE') {
+                    showBackendUnavailable();
+                } else {
+                    showAlert('Erro de conexão. Tente novamente.', 'error');
+                }
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Entrar';
