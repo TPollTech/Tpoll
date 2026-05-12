@@ -1,0 +1,16 @@
+{
+  "name": "tpoll-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TPoll website with secure local-only store admin backend",
+  "main": "server/app.js",
+  "scripts": {
+    "start": "node server/app.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}

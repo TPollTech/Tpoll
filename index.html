@@ -39,7 +39,7 @@
     }
     </script>
     
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🔧</text></svg>">
+    <link rel="icon" type="image/png" href="TPoll%20Logo.png">
     <title>TPoll Assistência Técnica</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -50,24 +50,35 @@
     <!-- Navigation -->
     <nav class="navbar" id="navbar">
         <div class="nav-container">
-            <a href="#home" class="nav-logo">🔧 TPoll</a>
+            <a href="#home" class="nav-logo" aria-label="TPoll Assistência Técnica">
+                <img src="TPoll%20Logo.png" alt="Logo TPoll" class="brand-mark">
+            </a>
             <button class="nav-toggle" id="navToggle" aria-label="Menu">
                 <span></span>
                 <span></span>
                 <span></span>
             </button>
             <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema">
-                <span class="theme-icon-light">☀️</span>
-                <span class="theme-icon-dark">🌙</span>
+                <span class="theme-icon-light" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="4"></circle>
+                        <path d="M12 2v2.5M12 19.5V22M4.93 4.93l1.77 1.77M17.3 17.3l1.77 1.77M2 12h2.5M19.5 12H22M4.93 19.07l1.77-1.77M17.3 6.7l1.77-1.77"></path>
+                    </svg>
+                </span>
+                <span class="theme-icon-dark" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12.8A9 9 0 1 1 11.2 3a7.2 7.2 0 0 0 9.8 9.8z"></path>
+                    </svg>
+                </span>
             </button>
             <ul class="nav-menu" id="navMenu">
                 <li><a href="#home" class="nav-link">Início</a></li>
                 <li><a href="#sobre" class="nav-link">Sobre</a></li>
                 <li><a href="#servicos" class="nav-link">Serviços</a></li>
-                <li><a href="loja.html" class="nav-link">Loja</a></li>
                 <li><a href="#diferenciais" class="nav-link">Diferenciais</a></li>
-                <li><a href="#depoimentos" class="nav-link">Depoimentos</a></li>
+                <li><a href="#produtos" class="nav-link">Produtos</a></li>
                 <li><a href="#faq" class="nav-link">FAQ</a></li>
+                <li><a href="loja.html" class="nav-link nav-loja">Loja</a></li>
                 <li><a href="#contato" class="nav-link nav-cta">Contato</a></li>
             </ul>
         </div>
@@ -76,17 +87,14 @@
     <!-- Hero Section -->
     <header id="home" class="hero">
         <div class="container">
-            <div class="logo-container">
-                <div class="logo-icon">🔧</div>
-            </div>
             <h1 class="hero-title">TPoll Assistência Técnica</h1>
             <p class="hero-subtitle">
                 <span id="typewriter"></span><span class="typewriter-cursor">|</span>
             </p>
             <div class="hero-features">
-                <div class="hero-feature">✓ Diagnóstico Gratuito</div>
-                <div class="hero-feature">✓ Garantia do Serviço</div>
-                <div class="hero-feature">✓ Atendimento Rápido</div>
+                <div class="hero-feature"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>Diagnóstico Gratuito</span></div>
+                <div class="hero-feature"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>Garantia do Serviço</span></div>
+                <div class="hero-feature"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>Atendimento Rápido</span></div>
             </div>
             <a href="#contato" class="cta-button">Solicite um orçamento</a>
         </div>
@@ -154,22 +162,30 @@
             <h2 class="section-title">Por que escolher a TPoll?</h2>
             <div class="benefits-grid">
                 <div class="benefit-card">
-                    <div class="benefit-icon">⚡</div>
+                    <div class="benefit-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4 14h7l-1 8 10-12h-7z"/></svg>
+                    </div>
                     <h3>Atendimento Rápido</h3>
                     <p>Diagnóstico em até 24h e reparo ágil para você não ficar sem seu aparelho</p>
                 </div>
                 <div class="benefit-card">
-                    <div class="benefit-icon">💎</div>
+                    <div class="benefit-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l5-5h8l5 5-9 13z"/><path d="M3 8h18"/></svg>
+                    </div>
                     <h3>Peças de Qualidade</h3>
                     <p>Trabalhamos apenas com peças originais ou de primeira linha</p>
                 </div>
                 <div class="benefit-card">
-                    <div class="benefit-icon">🛡️</div>
+                    <div class="benefit-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 5-3.5 8.5-7 9-3.5-.5-7-4-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg>
+                    </div>
                     <h3>Garantia</h3>
                     <p>Todos os serviços com garantia de 90 dias</p>
                 </div>
                 <div class="benefit-card">
-                    <div class="benefit-icon">💰</div>
+                    <div class="benefit-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 12h.01M18 12h.01"/></svg>
+                    </div>
                     <h3>Preço Justo</h3>
                     <p>Orçamento transparente sem custos ocultos</p>
                 </div>
@@ -183,17 +199,23 @@
             <h2 class="section-title">Nossos Serviços</h2>
             <div class="services-grid">
                 <div class="service-card">
-                    <div class="service-icon">📱</div>
+                    <div class="service-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>
+                    </div>
                     <h3>Celulares e Tablets</h3>
                     <p>Conserto de telas, baterias, conectores de carga, problemas de software e muito mais. Atendemos todas as marcas e modelos.</p>
                 </div>
                 <div class="service-card">
-                    <div class="service-icon">💻</div>
+                    <div class="service-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 20h8M6 17h12"/></svg>
+                    </div>
                     <h3>Notebooks e Computadores</h3>
                     <p>Manutenção preventiva, limpeza, troca de peças, upgrade de componentes, formatação e remoção de vírus.</p>
                 </div>
                 <div class="service-card">
-                    <div class="service-icon">🔧</div>
+                    <div class="service-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 7a4 4 0 0 0 5 5l-8 8a2 2 0 0 1-3-3l8-8a4 4 0 0 0-2-2z"/><path d="M5 21l2-2"/></svg>
+                    </div>
                     <h3>Eletrônicos em Geral</h3>
                     <p>Conserto e manutenção de diversos aparelhos eletrônicos com diagnóstico preciso e orçamento sem compromisso.</p>
                 </div>
@@ -233,44 +255,22 @@
         </div>
     </section>
 
-    <!-- Depoimentos Section -->
-    <section id="depoimentos" class="section">
+    <!-- Loja Preview Section -->
+    <section id="produtos" class="section section-store-preview">
         <div class="container">
-            <h2 class="section-title">O Que Nossos Clientes Dizem</h2>
-            <div class="testimonials-grid">
-                <div class="testimonial-card">
-                    <div class="testimonial-stars">★★★★★</div>
-                    <p class="testimonial-text">"Excelente atendimento! Meu celular ficou pronto no mesmo dia e o preço foi muito justo. Recomendo!"</p>
-                    <div class="testimonial-author">
-                        <div class="author-avatar">M</div>
-                        <div class="author-info">
-                            <strong>Maria S.</strong>
-                            <span>Troca de tela - iPhone</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="testimonial-card">
-                    <div class="testimonial-stars">★★★★★</div>
-                    <p class="testimonial-text">"Levei meu notebook que não ligava mais e conseguiram resolver rapidamente. Ótimo profissional!"</p>
-                    <div class="testimonial-author">
-                        <div class="author-avatar">J</div>
-                        <div class="author-info">
-                            <strong>João P.</strong>
-                            <span>Reparo de notebook</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="testimonial-card">
-                    <div class="testimonial-stars">★★★★★</div>
-                    <p class="testimonial-text">"Atendimento transparente e honesto. Me explicaram tudo antes de fazer o serviço. Voltarei sempre!"</p>
-                    <div class="testimonial-author">
-                        <div class="author-avatar">A</div>
-                        <div class="author-info">
-                            <strong>Ana C.</strong>
-                            <span>Troca de bateria</span>
-                        </div>
-                    </div>
-                </div>
+            <div class="store-preview-header">
+                <span class="store-preview-eyebrow">Peças &amp; Acessórios</span>
+                <h2 class="section-title" style="color:#000000">Nossa Loja</h2>
+                <p class="section-subtitle">Produtos selecionados com qualidade garantida</p>
+            </div>
+            <div class="store-preview-grid" id="storePreviewGrid">
+                <div class="store-preview-loading">Carregando produtos...</div>
+            </div>
+            <div class="store-preview-cta">
+                <a href="loja.html" class="btn-store-cta">
+                    Ver todos os produtos
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </a>
             </div>
         </div>
     </section>
@@ -326,20 +326,22 @@
             <h2 class="section-title">Região de Atendimento</h2>
             <div class="location-content">
                 <div class="location-info">
-                    <div class="location-icon">📍</div>
+                    <div class="location-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+                    </div>
                     <h3>Itacurubi - RS</h3>
                     <p>Av. Dez de Abril, 659 - Centro<br>Itacurubi - RS, 97685-000</p>
                     <div class="location-features">
                         <div class="location-feature">
-                            <span class="feature-icon">🏠</span>
+                            <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg></span>
                             <span>Atendimento Presencial</span>
                         </div>
                         <div class="location-feature">
-                            <span class="feature-icon">📦</span>
+                            <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/></svg></span>
                             <span>Recebemos via Correios</span>
                         </div>
                         <div class="location-feature">
-                            <span class="feature-icon">🚗</span>
+                            <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 13l2-5h14l2 5"/><path d="M5 13h14v5H5z"/><circle cx="7.5" cy="18" r="1.5"/><circle cx="16.5" cy="18" r="1.5"/></svg></span>
                             <span>Busca e Entrega*</span>
                         </div>
                     </div>
@@ -413,21 +415,21 @@
                     <h3>Outras formas de contato</h3>
                     <div class="contact-info">
                         <div class="contact-item">
-                            <div class="contact-icon">📱</div>
+                            <div class="contact-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.3 19.3 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8 9.5a16 16 0 0 0 6.5 6.5l1.1-1.1a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6A2 2 0 0 1 22 16.9z"/></svg></div>
                             <div>
                                 <strong>WhatsApp</strong>
                                 <a href="https://wa.me/5555996765404" target="_blank" class="whatsapp-link">(55) 99676-5404</a>
                             </div>
                         </div>
                         <div class="contact-item">
-                            <div class="contact-icon">📧</div>
+                            <div class="contact-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></div>
                             <div>
                                 <strong>E-mail</strong>
                                 <a href="mailto:tpollassistenciatecnica@gmail.com">tpollassistenciatecnica@gmail.com</a>
                             </div>
                         </div>
                         <div class="contact-item">
-                            <div class="contact-icon">🕐</div>
+                            <div class="contact-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
                             <div>
                                 <strong>Horário de Atendimento</strong>
                                 <span>Segunda a Sexta: 9h às 17h</span>
@@ -435,7 +437,7 @@
                         </div>
                     </div>
                     <div class="trust-box">
-                        <div class="trust-icon">🔒</div>
+                        <div class="trust-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 10V7a6 6 0 0 1 12 0v3"/><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M9 15l2 2 4-4"/></svg></div>
                         <p>Trabalhamos com transparência, qualidade e garantia. Seu equipamento está em boas mãos!</p>
                     </div>
                 </div>
@@ -454,19 +456,19 @@
                         <label>Tipo de Aparelho</label>
                         <div class="calc-options" id="calcDevice">
                             <button type="button" class="calc-option" data-value="celular" data-base="80">
-                                <span class="calc-option-icon">📱</span>
+                                <span class="calc-option-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg></span>
                                 <span>Celular</span>
                             </button>
                             <button type="button" class="calc-option" data-value="tablet" data-base="100">
-                                <span class="calc-option-icon">📱</span>
+                                <span class="calc-option-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="2"/></svg></span>
                                 <span>Tablet</span>
                             </button>
                             <button type="button" class="calc-option" data-value="notebook" data-base="120">
-                                <span class="calc-option-icon">💻</span>
+                                <span class="calc-option-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 20h8M6 17h12"/></svg></span>
                                 <span>Notebook</span>
                             </button>
                             <button type="button" class="calc-option" data-value="desktop" data-base="100">
-                                <span class="calc-option-icon">🖥️</span>
+                                <span class="calc-option-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M12 16v4M8 20h8"/></svg></span>
                                 <span>Desktop</span>
                             </button>
                         </div>
@@ -512,7 +514,10 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">
-                    <span class="footer-logo">🔧 TPoll</span>
+                    <span class="footer-logo">
+                        <img src="TPoll%20Logo.png" alt="Logo TPoll" class="footer-brand-mark">
+                        <span>TPoll</span>
+                    </span>
                     <p>Assistência Técnica de Confiança</p>
                     <div class="footer-social">
                         <a href="https://www.instagram.com/tpoll.assistencia_tecnica" target="_blank" rel="noopener noreferrer" aria-label="Instagram" class="social-link">
@@ -572,7 +577,7 @@
     <!-- Cookie Banner LGPD -->
     <div class="cookie-banner" id="cookieBanner">
         <div class="cookie-content">
-            <p>🍪 Este site utiliza cookies para melhorar sua experiência. Ao continuar navegando, você concorda com nossa <a href="#">Política de Privacidade</a>.</p>
+            <p>Este site utiliza cookies para melhorar sua experiência. Ao continuar navegando, você concorda com nossa <a href="#">Política de Privacidade</a>.</p>
             <div class="cookie-buttons">
                 <button class="cookie-accept" id="cookieAccept">Aceitar</button>
                 <button class="cookie-decline" id="cookieDecline">Recusar</button>

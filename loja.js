@@ -1,7 +1,3 @@
-const STORE_STORAGE_KEY = 'tpoll_store_products_v1';
-const STORE_ADMIN_PASSWORD = 'tpoll2026';
-const STORE_ADMIN_SESSION_KEY = 'tpoll_store_admin_session';
-
 const storeProductsContainer = document.getElementById('storeProducts');
 const storeEmpty = document.getElementById('storeEmpty');
 const storeSearch = document.getElementById('storeSearch');
@@ -16,32 +12,7 @@ const storeProductForm = document.getElementById('storeProductForm');
 const storeAdminList = document.getElementById('storeAdminList');
 const clearProductFormBtn = document.getElementById('clearProductForm');
 
-const defaultStoreProducts = [
-    {
-        id: crypto.randomUUID(),
-        name: 'Cabo USB-C Turbo',
-        category: 'Acessórios',
-        description: 'Cabo reforçado com carregamento rápido.',
-        price: 39.9,
-        promoPrice: 29.9,
-        onSale: true,
-        stock: 12,
-        image: '',
-        active: true
-    },
-    {
-        id: crypto.randomUUID(),
-        name: 'Película 3D Premium',
-        category: 'Proteção',
-        description: 'Película resistente para celulares.',
-        price: 45,
-        promoPrice: 0,
-        onSale: false,
-        stock: 20,
-        image: '',
-        active: true
-    }
-];
+let storeProducts = [];
 
 function parseMoney(value) {
     const numberValue = Number(value);
@@ -52,33 +23,41 @@ function formatMoneyBRL(value) {
     return `R$ ${value.toFixed(2).replace('.', ',')}`;
 }
 
-function loadStoreProducts() {
-    const saved = localStorage.getItem(STORE_STORAGE_KEY);
-    if (!saved) {
-        localStorage.setItem(STORE_STORAGE_KEY, JSON.stringify(defaultStoreProducts));
-        return [...defaultStoreProducts];
-    }
-
-    try {
-        const parsed = JSON.parse(saved);
-        if (!Array.isArray(parsed)) return [...defaultStoreProducts];
-        return parsed;
-    } catch {
-        return [...defaultStoreProducts];
-    }
+function isLocalClient() {
+    const hostname = (window.location.hostname || '').toLowerCase();
+    return hostname === 'localhost' || hostname === '127.0.0.1';
 }
 
-function saveStoreProducts(products) {
-    localStorage.setItem(STORE_STORAGE_KEY, JSON.stringify(products));
+async function apiRequest(url, options = {}) {
+    const response = await fetch(url, {
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+            ...(options.headers || {})
+        },
+        ...options
+    });
+
+    const contentType = response.headers.get('content-type') || '';
+    const body = contentType.includes('application/json') ? await response.json() : null;
+
+    if (!response.ok) {
+        const message = body?.error || 'Erro ao processar a solicitação.';
+        throw new Error(message);
+    }
+
+    return body;
 }
 
-let storeProducts = loadStoreProducts();
+async function loadStoreProducts() {
+    storeProducts = await apiRequest('/api/store/products', { method: 'GET' });
+}
 
 function getFilteredProducts() {
     const query = (storeSearch?.value || '').trim().toLowerCase();
     const category = storeCategoryFilter?.value || 'all';
 
-    return storeProducts.filter(product => {
+    return storeProducts.filter((product) => {
         if (!product.active) return false;
 
         const matchesSearch = !query
@@ -96,20 +75,20 @@ function buildStoreCategoryOptions() {
     const currentValue = storeCategoryFilter.value;
     const categories = [...new Set(
         storeProducts
-            .map(product => (product.category || '').trim())
+            .map((product) => (product.category || '').trim())
             .filter(Boolean)
     )].sort((left, right) => left.localeCompare(right));
 
     storeCategoryFilter.innerHTML = '<option value="all">Todas as categorias</option>';
 
-    categories.forEach(category => {
+    categories.forEach((category) => {
         const option = document.createElement('option');
         option.value = category;
         option.textContent = category;
         storeCategoryFilter.appendChild(option);
     });
 
-    if ([...storeCategoryFilter.options].some(option => option.value === currentValue)) {
+    if ([...storeCategoryFilter.options].some((option) => option.value === currentValue)) {
         storeCategoryFilter.value = currentValue;
     }
 }
@@ -136,7 +115,7 @@ function createProductCard(product) {
 
     const imageMarkup = product.image
         ? `<img src="${product.image}" alt="${product.name}" class="store-card-image">`
-        : '<div class="store-card-image-placeholder">🛍️</div>';
+        : '<div class="store-card-image-placeholder"><span class="store-placeholder-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7L6 8z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg></span></div>';
 
     const hasPromo = product.onSale && product.promoPrice > 0 && product.promoPrice < product.price;
     const priceMarkup = hasPromo
@@ -180,7 +159,7 @@ function renderStore() {
     }
 
     storeEmpty.hidden = true;
-    filteredProducts.forEach(product => {
+    filteredProducts.forEach((product) => {
         storeProductsContainer.appendChild(createProductCard(product));
     });
 }
@@ -191,12 +170,6 @@ function setAdminLoggedIn(isLoggedIn) {
     storeAdminContent.hidden = !isLoggedIn;
     storeAdminPassword.hidden = isLoggedIn;
     storeAdminLogout.hidden = !isLoggedIn;
-
-    if (isLoggedIn) {
-        localStorage.setItem(STORE_ADMIN_SESSION_KEY, '1');
-    } else {
-        localStorage.removeItem(STORE_ADMIN_SESSION_KEY);
-    }
 }
 
 function resetProductForm() {
@@ -246,7 +219,7 @@ function renderAdminList() {
         return;
     }
 
-    storeProducts.forEach(product => {
+    storeProducts.forEach((product) => {
         const row = document.createElement('div');
         row.className = 'store-admin-item';
 
@@ -266,7 +239,15 @@ function renderAdminList() {
     });
 }
 
-function refreshStoreUI() {
+async function reloadForAdmin() {
+    storeProducts = await apiRequest('/api/admin/products', { method: 'GET' });
+    buildStoreCategoryOptions();
+    renderStore();
+    renderAdminList();
+}
+
+async function reloadForPublic() {
+    await loadStoreProducts();
     buildStoreCategoryOptions();
     renderStore();
     renderAdminList();
@@ -280,83 +261,82 @@ if (storeCategoryFilter) {
     storeCategoryFilter.addEventListener('change', renderStore);
 }
 
-if (openStoreAdmin && storeAdminPanel) {
-    openStoreAdmin.addEventListener('click', () => {
-        storeAdminPanel.hidden = !storeAdminPanel.hidden;
+if (storeAdminLogout) {
+    storeAdminLogout.addEventListener('click', async () => {
+        try {
+            await apiRequest('/api/admin/logout', { method: 'POST' });
+        } catch {
+            // no-op
+        }
+        setAdminLoggedIn(false);
+        resetProductForm();
+        await reloadForPublic();
     });
 }
 
 if (storeLoginForm) {
-    storeLoginForm.addEventListener('submit', (event) => {
+    storeLoginForm.addEventListener('submit', async (event) => {
         event.preventDefault();
+        try {
+            await apiRequest('/api/admin/login', {
+                method: 'POST',
+                body: JSON.stringify({ password: (storeAdminPassword?.value || '').trim() })
+            });
 
-        const password = (storeAdminPassword?.value || '').trim();
-        if (password !== STORE_ADMIN_PASSWORD) {
-            alert('Senha inválida.');
-            return;
+            if (storeAdminPassword) storeAdminPassword.value = '';
+            setAdminLoggedIn(true);
+            await reloadForAdmin();
+        } catch (error) {
+            alert(error.message);
         }
-
-        setAdminLoggedIn(true);
-        if (storeAdminPassword) storeAdminPassword.value = '';
-        renderAdminList();
-    });
-}
-
-if (storeAdminLogout) {
-    storeAdminLogout.addEventListener('click', () => {
-        setAdminLoggedIn(false);
-        resetProductForm();
     });
 }
 
 if (storeProductForm) {
-    storeProductForm.addEventListener('submit', (event) => {
+    storeProductForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
         const id = document.getElementById('storeProductId')?.value || '';
-        const name = document.getElementById('productName')?.value.trim() || '';
-        const category = document.getElementById('productCategory')?.value.trim() || '';
-        const description = document.getElementById('productDescription')?.value.trim() || '';
-        const price = parseMoney(document.getElementById('productPrice')?.value || 0);
-        const promoPrice = parseMoney(document.getElementById('productPromoPrice')?.value || 0);
-        const stock = Math.max(0, parseInt(document.getElementById('productStock')?.value || '0', 10));
-        const image = document.getElementById('productImage')?.value.trim() || '';
-        const onSale = Boolean(document.getElementById('productOnSale')?.checked);
-        const active = Boolean(document.getElementById('productActive')?.checked);
+        const payload = {
+            name: document.getElementById('productName')?.value.trim() || '',
+            category: document.getElementById('productCategory')?.value.trim() || '',
+            description: document.getElementById('productDescription')?.value.trim() || '',
+            price: parseMoney(document.getElementById('productPrice')?.value || 0),
+            promoPrice: parseMoney(document.getElementById('productPromoPrice')?.value || 0),
+            stock: Math.max(0, parseInt(document.getElementById('productStock')?.value || '0', 10)),
+            image: document.getElementById('productImage')?.value.trim() || '',
+            onSale: Boolean(document.getElementById('productOnSale')?.checked),
+            active: Boolean(document.getElementById('productActive')?.checked)
+        };
 
-        if (!name) {
+        if (!payload.name) {
             alert('Informe o nome do produto.');
             return;
         }
 
-        if (price <= 0) {
+        if (payload.price <= 0) {
             alert('Informe um preço válido.');
             return;
         }
 
-        const productPayload = {
-            id: id || crypto.randomUUID(),
-            name,
-            category,
-            description,
-            price,
-            promoPrice,
-            onSale,
-            stock,
-            image,
-            active
-        };
+        try {
+            if (id) {
+                await apiRequest(`/api/admin/products/${id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(payload)
+                });
+            } else {
+                await apiRequest('/api/admin/products', {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+            }
 
-        const existingIndex = storeProducts.findIndex(product => product.id === productPayload.id);
-        if (existingIndex >= 0) {
-            storeProducts[existingIndex] = productPayload;
-        } else {
-            storeProducts.unshift(productPayload);
+            await reloadForAdmin();
+            resetProductForm();
+        } catch (error) {
+            alert(error.message);
         }
-
-        saveStoreProducts(storeProducts);
-        refreshStoreUI();
-        resetProductForm();
     });
 }
 
@@ -365,13 +345,13 @@ if (clearProductFormBtn) {
 }
 
 if (storeAdminList) {
-    storeAdminList.addEventListener('click', (event) => {
+    storeAdminList.addEventListener('click', async (event) => {
         const button = event.target.closest('button[data-action]');
         if (!button) return;
 
         const action = button.dataset.action;
         const id = button.dataset.id;
-        const product = storeProducts.find(item => item.id === id);
+        const product = storeProducts.find((item) => item.id === id);
         if (!product) return;
 
         if (action === 'edit') {
@@ -379,24 +359,59 @@ if (storeAdminList) {
             return;
         }
 
-        if (action === 'toggle') {
-            product.active = !product.active;
-            saveStoreProducts(storeProducts);
-            refreshStoreUI();
-            return;
-        }
+        try {
+            if (action === 'toggle') {
+                await apiRequest(`/api/admin/products/${id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ ...product, active: !product.active })
+                });
+                await reloadForAdmin();
+                return;
+            }
 
-        if (action === 'delete') {
-            const confirmed = window.confirm(`Remover "${product.name}" da loja?`);
-            if (!confirmed) return;
+            if (action === 'delete') {
+                const confirmed = window.confirm(`Remover "${product.name}" da loja?`);
+                if (!confirmed) return;
 
-            storeProducts = storeProducts.filter(item => item.id !== id);
-            saveStoreProducts(storeProducts);
-            refreshStoreUI();
-            resetProductForm();
+                await apiRequest(`/api/admin/products/${id}`, {
+                    method: 'DELETE'
+                });
+
+                await reloadForAdmin();
+                resetProductForm();
+            }
+        } catch (error) {
+            alert(error.message);
         }
     });
 }
 
-setAdminLoggedIn(localStorage.getItem(STORE_ADMIN_SESSION_KEY) === '1');
-refreshStoreUI();
+async function initStore() {
+    if (openStoreAdmin) openStoreAdmin.hidden = true;
+    if (storeAdminPanel) storeAdminPanel.hidden = true;
+
+    try {
+        const status = await apiRequest('/api/admin/status', { method: 'GET' });
+
+        if (isLocalClient() && status.adminEnabled && openStoreAdmin) {
+            openStoreAdmin.hidden = false;
+            openStoreAdmin.addEventListener('click', () => {
+                if (!storeAdminPanel) return;
+                storeAdminPanel.hidden = !storeAdminPanel.hidden;
+            });
+        }
+
+        if (status.loggedIn) {
+            setAdminLoggedIn(true);
+            await reloadForAdmin();
+        } else {
+            setAdminLoggedIn(false);
+            await reloadForPublic();
+        }
+    } catch {
+        setAdminLoggedIn(false);
+        await reloadForPublic();
+    }
+}
+
+initStore();
