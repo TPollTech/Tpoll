@@ -112,7 +112,14 @@
             </div>
 
             <div class="pix-qr-wrapper">
-                <canvas id="pixQrCanvas"></canvas>
+                <div id="pixQrBox" class="pix-qr-box">
+                    <img id="pixQrImg" class="pix-qr-img" alt="QR Code PIX" src="" hidden>
+                    <div id="pixQrFallback" class="pix-qr-fallback" hidden>
+                        <p>QR Code indisponível.</p>
+                        <p>Use a chave abaixo para pagar.</p>
+                    </div>
+                    <div id="pixQrLoading" class="pix-qr-loading">Gerando QR Code…</div>
+                </div>
                 <p class="pix-qr-hint">Abra o app do banco → PIX → Ler QR Code</p>
             </div>
 

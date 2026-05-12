@@ -309,7 +309,6 @@ function openPixModal(product) {
     const payload     = buildPixPayload(finalPrice, txId);
 
     const modal       = document.getElementById('pixModal');
-    const canvas      = document.getElementById('pixQrCanvas');
     const nameEl      = document.getElementById('pixProductName');
     const priceEl     = document.getElementById('pixProductPrice');
     const confirmBtn  = document.getElementById('pixConfirmWhatsApp');
@@ -318,18 +317,10 @@ function openPixModal(product) {
     const copyBtn     = document.getElementById('pixCopyBtn');
     const copyLabel   = document.getElementById('pixCopyLabel');
 
-    if (!modal || !canvas) return;
+    if (!modal) return;
 
     if (nameEl)  nameEl.textContent  = product.name || 'Produto TPoll';
     if (priceEl) priceEl.textContent = formatMoneyBRL(finalPrice);
-
-    if (typeof QRCode !== 'undefined' && canvas) {
-        QRCode.toCanvas(canvas, payload, {
-            width: 220,
-            margin: 1,
-            color: { dark: '#0d2234', light: '#ffffff' }
-        });
-    }
 
     const closeModal = () => { modal.hidden = true; document.body.style.overflow = ''; };
 
@@ -365,6 +356,50 @@ function openPixModal(product) {
 
     modal.hidden = false;
     document.body.style.overflow = 'hidden';
+
+    // generate QR after modal is visible so dimensions are correct
+    const qrImg      = document.getElementById('pixQrImg');
+    const qrLoading  = document.getElementById('pixQrLoading');
+    const qrFallback = document.getElementById('pixQrFallback');
+
+    if (qrImg)      { qrImg.hidden = true; qrImg.src = ''; }
+    if (qrFallback) { qrFallback.hidden = true; }
+    if (qrLoading)  { qrLoading.hidden = false; }
+
+    const showQr = (dataUrl) => {
+        if (qrLoading)  qrLoading.hidden = true;
+        if (qrImg)      { qrImg.src = dataUrl; qrImg.hidden = false; }
+    };
+
+    const showFallback = () => {
+        if (qrLoading)  qrLoading.hidden = true;
+        if (qrFallback) qrFallback.hidden = false;
+    };
+
+    if (typeof QRCode !== 'undefined') {
+        QRCode.toDataURL(payload, {
+            width: 220,
+            margin: 1,
+            color: { dark: '#0d2234', light: '#ffffff' }
+        }).then(showQr).catch(showFallback);
+    } else {
+        // library not yet loaded — wait up to 4s
+        let waited = 0;
+        const interval = setInterval(() => {
+            waited += 200;
+            if (typeof QRCode !== 'undefined') {
+                clearInterval(interval);
+                QRCode.toDataURL(payload, {
+                    width: 220,
+                    margin: 1,
+                    color: { dark: '#0d2234', light: '#ffffff' }
+                }).then(showQr).catch(showFallback);
+            } else if (waited >= 4000) {
+                clearInterval(interval);
+                showFallback();
+            }
+        }, 200);
+    }
 }
 
 
