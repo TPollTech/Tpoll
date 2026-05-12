@@ -357,7 +357,6 @@ function openPixModal(product) {
     modal.hidden = false;
     document.body.style.overflow = 'hidden';
 
-    // generate QR after modal is visible so dimensions are correct
     const qrImg      = document.getElementById('pixQrImg');
     const qrLoading  = document.getElementById('pixQrLoading');
     const qrFallback = document.getElementById('pixQrFallback');
@@ -366,39 +365,21 @@ function openPixModal(product) {
     if (qrFallback) { qrFallback.hidden = true; }
     if (qrLoading)  { qrLoading.hidden = false; }
 
-    const showQr = (dataUrl) => {
-        if (qrLoading)  qrLoading.hidden = true;
-        if (qrImg)      { qrImg.src = dataUrl; qrImg.hidden = false; }
-    };
+    if (qrImg) {
+        const encoded = encodeURIComponent(payload);
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=4&data=${encoded}`;
 
-    const showFallback = () => {
-        if (qrLoading)  qrLoading.hidden = true;
-        if (qrFallback) qrFallback.hidden = false;
-    };
+        qrImg.onload = () => {
+            if (qrLoading) qrLoading.hidden = true;
+            qrImg.hidden = false;
+        };
 
-    if (typeof QRCode !== 'undefined') {
-        QRCode.toDataURL(payload, {
-            width: 220,
-            margin: 1,
-            color: { dark: '#0d2234', light: '#ffffff' }
-        }).then(showQr).catch(showFallback);
-    } else {
-        // library not yet loaded — wait up to 4s
-        let waited = 0;
-        const interval = setInterval(() => {
-            waited += 200;
-            if (typeof QRCode !== 'undefined') {
-                clearInterval(interval);
-                QRCode.toDataURL(payload, {
-                    width: 220,
-                    margin: 1,
-                    color: { dark: '#0d2234', light: '#ffffff' }
-                }).then(showQr).catch(showFallback);
-            } else if (waited >= 4000) {
-                clearInterval(interval);
-                showFallback();
-            }
-        }, 200);
+        qrImg.onerror = () => {
+            if (qrLoading)  qrLoading.hidden = true;
+            if (qrFallback) qrFallback.hidden = false;
+        };
+
+        qrImg.src = qrUrl;
     }
 }
 
