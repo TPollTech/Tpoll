@@ -1,16 +1,7 @@
 const storeProductsContainer = document.getElementById('storeProducts');
-const storeEmpty = document.getElementById('storeEmpty');
-const storeSearch = document.getElementById('storeSearch');
-const storeCategoryFilter = document.getElementById('storeCategoryFilter');
-const openStoreAdmin = document.getElementById('openStoreAdmin');
-const storeAdminPanel = document.getElementById('storeAdminPanel');
-const storeLoginForm = document.getElementById('storeLoginForm');
-const storeAdminPassword = document.getElementById('storeAdminPassword');
-const storeAdminLogout = document.getElementById('storeAdminLogout');
-const storeAdminContent = document.getElementById('storeAdminContent');
-const storeProductForm = document.getElementById('storeProductForm');
-const storeAdminList = document.getElementById('storeAdminList');
-const clearProductFormBtn = document.getElementById('clearProductForm');
+const storeEmpty             = document.getElementById('storeEmpty');
+const openStoreAdmin         = document.getElementById('openStoreAdmin');
+const storeAdminPanel        = document.getElementById('storeAdminPanel');
 
 let storeProducts = [];
 
@@ -18,130 +9,15 @@ const storeApi = (window.TPollStoreApi && typeof window.TPollStoreApi.apiRequest
     ? window.TPollStoreApi
     : null;
 
-function parseMoney(value) {
-    const numberValue = Number(value);
-    return Number.isFinite(numberValue) ? numberValue : 0;
-}
+const { isLocalClient } = window.TPollUtils;
 
-function formatMoneyBRL(value) {
-    return `R$ ${value.toFixed(2).replace('.', ',')}`;
-}
+const storeAdmin = (window.TPollStoreAdmin && typeof window.TPollStoreAdmin.init === 'function')
+    ? window.TPollStoreAdmin
+    : null;
 
-function escapeHtml(value) {
-    return String(value || '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-}
-
-function sanitizeImageUrl(value) {
-    const image = String(value || '').trim();
-    if (!image) return '';
-
-    const hasUnsafeChars = /["'<>\\]/.test(image);
-    if (hasUnsafeChars) return '';
-
-    const isAllowedRelative = image.startsWith('assets/') || image.startsWith('/assets/') || image.startsWith('./assets/');
-    const isAllowedAbsolute = image.startsWith('https://') || image.startsWith('http://');
-    return isAllowedRelative || isAllowedAbsolute ? image : '';
-}
-
-function canProcessImageForBgRemoval(imageElement) {
-    const src = String(imageElement.getAttribute('src') || imageElement.src || '');
-    if (!src) return false;
-
-    if (src.startsWith('data:')) return true;
-
-    try {
-        const url = new URL(src, window.location.href);
-        return url.origin === window.location.origin;
-    } catch {
-        return false;
-    }
-}
-
-function removeLightBackground(imageElement) {
-    if (!imageElement || imageElement.dataset.bgProcessed === '1') return;
-
-    const process = () => {
-        if (!canProcessImageForBgRemoval(imageElement)) {
-            imageElement.dataset.bgProcessed = '1';
-            return;
-        }
-
-        const width = imageElement.naturalWidth;
-        const height = imageElement.naturalHeight;
-        if (!width || !height || width * height > 5000000) {
-            imageElement.dataset.bgProcessed = '1';
-            return;
-        }
-
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const context = canvas.getContext('2d', { willReadFrequently: true });
-        if (!context) {
-            imageElement.dataset.bgProcessed = '1';
-            return;
-        }
-
-        try {
-            context.drawImage(imageElement, 0, 0, width, height);
-            const imageData = context.getImageData(0, 0, width, height);
-            const data = imageData.data;
-
-            for (let index = 0; index < data.length; index += 4) {
-                const red = data[index];
-                const green = data[index + 1];
-                const blue = data[index + 2];
-                const alpha = data[index + 3];
-                if (alpha === 0) continue;
-
-                const max = Math.max(red, green, blue);
-                const min = Math.min(red, green, blue);
-                const isNeutral = (max - min) <= 22;
-
-                if (isNeutral && max >= 240) {
-                    data[index + 3] = 0;
-                    continue;
-                }
-
-                if (isNeutral && max >= 220) {
-                    data[index + 3] = Math.round(alpha * 0.35);
-                }
-            }
-
-            context.putImageData(imageData, 0, 0);
-            imageElement.src = canvas.toDataURL('image/png');
-        } catch {
-            // mantém imagem original caso não seja possível processar
-        } finally {
-            imageElement.dataset.bgProcessed = '1';
-        }
-    };
-
-    if (imageElement.complete) {
-        process();
-    } else {
-        imageElement.addEventListener('load', process, { once: true });
-        imageElement.addEventListener('error', () => {
-            imageElement.dataset.bgProcessed = '1';
-        }, { once: true });
-    }
-}
-
-function enhanceProductImages(container) {
-    if (!container) return;
-    const images = container.querySelectorAll('img.store-card-image');
-    images.forEach((imageElement) => removeLightBackground(imageElement));
-}
-
-function isLocalClient() {
-    const hostname = (window.location.hostname || '').toLowerCase();
-    return hostname === 'localhost' || hostname === '127.0.0.1';
-}
+const storeUi = (window.TPollStoreUI && typeof window.TPollStoreUI.init === 'function')
+    ? window.TPollStoreUI
+    : null;
 
 async function loadStoreProducts() {
     if (!storeApi || typeof storeApi.loadStoreProducts !== 'function') {
@@ -151,390 +27,34 @@ async function loadStoreProducts() {
     storeProducts = await storeApi.loadStoreProducts();
 }
 
-function getFilteredProducts() {
-    const query = ((storeSearch && storeSearch.value) || '').trim().toLowerCase();
-    const category = (storeCategoryFilter && storeCategoryFilter.value) || 'all';
+// UI rendering lives in loja.ui.js (window.TPollStoreUI)
+// Admin panel lives in loja.admin.js (window.TPollStoreAdmin)
 
-    return storeProducts.filter((product) => {
-        if (!product.active) return false;
-
-        const matchesSearch = !query
-            || product.name.toLowerCase().includes(query)
-            || (product.description || '').toLowerCase().includes(query);
-
-        const matchesCategory = category === 'all' || (product.category || '') === category;
-        return matchesSearch && matchesCategory;
-    });
-}
-
-function buildStoreCategoryOptions() {
-    if (!storeCategoryFilter) return;
-
-    const currentValue = storeCategoryFilter.value;
-    const categories = [...new Set(
-        storeProducts
-            .map((product) => (product.category || '').trim())
-            .filter(Boolean)
-    )].sort((left, right) => left.localeCompare(right));
-
-    storeCategoryFilter.innerHTML = '<option value="all">Todas as categorias</option>';
-
-    categories.forEach((category) => {
-        const option = document.createElement('option');
-        option.value = category;
-        option.textContent = category;
-        storeCategoryFilter.appendChild(option);
-    });
-
-    if ([...storeCategoryFilter.options].some((option) => option.value === currentValue)) {
-        storeCategoryFilter.value = currentValue;
-    }
-}
-
-// ── WhatsApp direct contact ────────────────────────────────────────────────
-
-function openProductOnWhatsApp(product) {
-    const finalPrice = product.onSale && product.promoPrice > 0 ? product.promoPrice : product.price;
-    const message = [
-        'Olá! Tenho interesse neste item da loja TPoll:',
-        '',
-        `*Produto:* ${product.name}`,
-        `*Preço:* ${formatMoneyBRL(finalPrice)}`,
-        `*Categoria:* ${product.category || 'Geral'}`,
-        '',
-        'Pode me passar mais detalhes?'
-    ].join('\n');
-    window.open(`https://wa.me/5555996765404?text=${encodeURIComponent(message)}`, '_blank');
-}
-
-function openProductOnPix(product) {
-    if (!window.TPollPix || typeof window.TPollPix.openPixModal !== 'function') {
-        alert('PIX indisponível no momento. Tente novamente.');
-        return;
-    }
-
-    window.TPollPix.openPixModal(product, { formatMoneyBRL });
-}
-
-
-
-function createProductCard(product) {
-    const card = document.createElement('article');
-    card.className = 'store-card';
-
-    const safeName = escapeHtml(product.name || '');
-    const safeCategory = escapeHtml(product.category || 'Geral');
-    const safeDescription = escapeHtml(product.description || 'Sem descrição.');
-    const safeImage = sanitizeImageUrl(product.image);
-
-    const imageMarkup = safeImage
-        ? `<img src="${safeImage}" alt="${safeName}" class="store-card-image" loading="lazy">`
-        : '<div class="store-card-image-placeholder"><span class="store-placeholder-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7L6 8z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg></span></div>';
-
-    const hasPromo = product.onSale && product.promoPrice > 0 && product.promoPrice < product.price;
-    const priceMarkup = hasPromo
-        ? `<p class="store-card-price"><span class="store-price-old">${formatMoneyBRL(parseMoney(product.price))}</span><span class="store-price-new">${formatMoneyBRL(parseMoney(product.promoPrice))}</span></p>`
-        : `<p class="store-card-price">${formatMoneyBRL(parseMoney(product.price))}</p>`;
-
-    card.innerHTML = `
-        ${imageMarkup}
-        <div class="store-card-content">
-            <p class="store-card-category">${safeCategory}</p>
-            <h3>${safeName}</h3>
-            <p class="store-card-description">${safeDescription}</p>
-            ${priceMarkup}
-            <p class="store-card-stock">Estoque: ${Math.max(0, parseInt(product.stock || 0, 10))}</p>
-            <div class="store-card-actions">
-                <button type="button" class="store-buy-btn">WhatsApp</button>
-                <button type="button" class="store-pix-btn">Pagar no PIX</button>
-            </div>
-        </div>
-    `;
-
-    if (hasPromo) {
-        const badge = document.createElement('span');
-        badge.className = 'store-sale-badge';
-        badge.textContent = 'Promoção';
-        card.appendChild(badge);
-    }
-
-    const buyButton = card.querySelector('.store-buy-btn');
-    if (buyButton) {
-        buyButton.addEventListener('click', () => openProductOnWhatsApp(product));
-    }
-
-    const pixButton = card.querySelector('.store-pix-btn');
-    if (pixButton) {
-        pixButton.addEventListener('click', () => openProductOnPix(product));
-    }
-
-    return card;
-}
-
-function renderStore() {
-    if (!storeProductsContainer || !storeEmpty) return;
-
-    const filteredProducts = getFilteredProducts();
-    storeProductsContainer.innerHTML = '';
-
-    if (filteredProducts.length === 0) {
-        storeEmpty.hidden = false;
-        return;
-    }
-
-    storeEmpty.hidden = true;
-    filteredProducts.forEach((product) => {
-        storeProductsContainer.appendChild(createProductCard(product));
-    });
-    enhanceProductImages(storeProductsContainer);
-}
-
-function setAdminLoggedIn(isLoggedIn) {
-    if (!storeAdminContent || !storeAdminLogout || !storeAdminPassword) return;
-
-    storeAdminContent.hidden = !isLoggedIn;
-    storeAdminPassword.hidden = isLoggedIn;
-    storeAdminLogout.hidden = !isLoggedIn;
-}
-
-function resetProductForm() {
-    if (!storeProductForm) return;
-
-    storeProductForm.reset();
-    const idInput = document.getElementById('storeProductId');
-    const activeInput = document.getElementById('productActive');
-    const stockInput = document.getElementById('productStock');
-
-    if (idInput) idInput.value = '';
-    if (activeInput) activeInput.checked = true;
-    if (stockInput) stockInput.value = '1';
-}
-
-function fillProductForm(product) {
-    const idInput = document.getElementById('storeProductId');
-    const nameInput = document.getElementById('productName');
-    const categoryInput = document.getElementById('productCategory');
-    const descriptionInput = document.getElementById('productDescription');
-    const priceInput = document.getElementById('productPrice');
-    const promoPriceInput = document.getElementById('productPromoPrice');
-    const stockInput = document.getElementById('productStock');
-    const imageInput = document.getElementById('productImage');
-    const onSaleInput = document.getElementById('productOnSale');
-    const activeInput = document.getElementById('productActive');
-
-    if (idInput) idInput.value = product.id;
-    if (nameInput) nameInput.value = product.name || '';
-    if (categoryInput) categoryInput.value = product.category || '';
-    if (descriptionInput) descriptionInput.value = product.description || '';
-    if (priceInput) priceInput.value = parseMoney(product.price).toString();
-    if (promoPriceInput) promoPriceInput.value = parseMoney(product.promoPrice).toString();
-    if (stockInput) stockInput.value = Math.max(0, parseInt(product.stock || 0, 10)).toString();
-    if (imageInput) imageInput.value = product.image || '';
-    if (onSaleInput) onSaleInput.checked = Boolean(product.onSale);
-    if (activeInput) activeInput.checked = Boolean(product.active);
-}
-
-function renderAdminList() {
-    if (!storeAdminList) return;
-
-    storeAdminList.innerHTML = '';
-
-    if (storeProducts.length === 0) {
-        storeAdminList.innerHTML = '<p class="store-empty">Nenhum item cadastrado.</p>';
-        return;
-    }
-
-    storeProducts.forEach((product) => {
-        const row = document.createElement('div');
-        row.className = 'store-admin-item';
-
-        const info = document.createElement('div');
-        const title = document.createElement('strong');
-        title.textContent = String(product.name || 'Sem nome');
-        const meta = document.createElement('p');
-        meta.textContent = `${product.category || 'Geral'} • Estoque: ${Math.max(0, parseInt(product.stock || 0, 10))}`;
-        info.appendChild(title);
-        info.appendChild(meta);
-
-        const actions = document.createElement('div');
-        actions.className = 'store-admin-item-actions';
-
-        const makeButton = (action, label, extraClass) => {
-            const button = document.createElement('button');
-            button.type = 'button';
-            button.dataset.action = action;
-            button.dataset.id = String(product.id || '');
-            button.className = extraClass ? `store-mini-btn ${extraClass}` : 'store-mini-btn';
-            button.textContent = label;
-            return button;
-        };
-
-        actions.appendChild(makeButton('toggle', product.active ? 'Desativar' : 'Ativar'));
-        actions.appendChild(makeButton('edit', 'Editar'));
-        actions.appendChild(makeButton('delete', 'Excluir', 'store-mini-btn-danger'));
-
-        row.appendChild(info);
-        row.appendChild(actions);
-
-        storeAdminList.appendChild(row);
-    });
-}
 
 async function reloadForAdmin() {
     storeProducts = await storeApi.apiRequest('/api/admin/products', { method: 'GET' });
-    buildStoreCategoryOptions();
-    renderStore();
-    renderAdminList();
+    if (storeUi) storeUi.buildStoreCategoryOptions();
+    if (storeUi) storeUi.renderStore();
+    if (storeAdmin) storeAdmin.renderAdminList(storeProducts);
 }
 
 async function reloadForPublic() {
     await loadStoreProducts();
-    buildStoreCategoryOptions();
-    renderStore();
-    renderAdminList();
+    if (storeUi) storeUi.buildStoreCategoryOptions();
+    if (storeUi) storeUi.renderStore();
+    if (storeAdmin) storeAdmin.renderAdminList(storeProducts);
 }
 
-if (storeSearch) {
-    storeSearch.addEventListener('input', renderStore);
+// UI and admin listeners are registered via init()
+if (storeUi) {
+    storeUi.init({ getProducts: () => storeProducts });
 }
 
-if (storeCategoryFilter) {
-    storeCategoryFilter.addEventListener('change', renderStore);
-}
-
-if (storeAdminLogout) {
-    storeAdminLogout.addEventListener('click', async () => {
-        try {
-            await storeApi.apiRequest('/api/admin/logout', { method: 'POST' });
-        } catch (error) {
-            // no-op
-        }
-        setAdminLoggedIn(false);
-        resetProductForm();
-        await reloadForPublic();
-    });
-}
-
-if (storeLoginForm) {
-    storeLoginForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        try {
-            await storeApi.apiRequest('/api/admin/login', {
-                method: 'POST',
-                body: JSON.stringify({ password: ((storeAdminPassword && storeAdminPassword.value) || '').trim() })
-            });
-
-            if (storeAdminPassword) storeAdminPassword.value = '';
-            setAdminLoggedIn(true);
-            await reloadForAdmin();
-        } catch (error) {
-            alert(error.message);
-        }
-    });
-}
-
-if (storeProductForm) {
-    storeProductForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-
-        const idInput = document.getElementById('storeProductId');
-        const nameInput = document.getElementById('productName');
-        const categoryInput = document.getElementById('productCategory');
-        const descriptionInput = document.getElementById('productDescription');
-        const priceInput = document.getElementById('productPrice');
-        const promoPriceInput = document.getElementById('productPromoPrice');
-        const stockInput = document.getElementById('productStock');
-        const imageInput = document.getElementById('productImage');
-        const onSaleInput = document.getElementById('productOnSale');
-        const activeInput = document.getElementById('productActive');
-
-        const id = (idInput && idInput.value) || '';
-        const payload = {
-            name: (nameInput && nameInput.value ? nameInput.value.trim() : ''),
-            category: (categoryInput && categoryInput.value ? categoryInput.value.trim() : ''),
-            description: (descriptionInput && descriptionInput.value ? descriptionInput.value.trim() : ''),
-            price: parseMoney((priceInput && priceInput.value) || 0),
-            promoPrice: parseMoney((promoPriceInput && promoPriceInput.value) || 0),
-            stock: Math.max(0, parseInt((stockInput && stockInput.value) || '0', 10)),
-            image: (imageInput && imageInput.value ? imageInput.value.trim() : ''),
-            onSale: Boolean(onSaleInput && onSaleInput.checked),
-            active: Boolean(activeInput && activeInput.checked)
-        };
-
-        if (!payload.name) {
-            alert('Informe o nome do produto.');
-            return;
-        }
-
-        if (payload.price <= 0) {
-            alert('Informe um preço válido.');
-            return;
-        }
-
-        try {
-            if (id) {
-                await storeApi.apiRequest(`/api/admin/products/${id}`, {
-                    method: 'PUT',
-                    body: JSON.stringify(payload)
-                });
-            } else {
-                await storeApi.apiRequest('/api/admin/products', {
-                    method: 'POST',
-                    body: JSON.stringify(payload)
-                });
-            }
-
-            await reloadForAdmin();
-            resetProductForm();
-        } catch (error) {
-            alert(error.message);
-        }
-    });
-}
-
-if (clearProductFormBtn) {
-    clearProductFormBtn.addEventListener('click', resetProductForm);
-}
-
-if (storeAdminList) {
-    storeAdminList.addEventListener('click', async (event) => {
-        const button = event.target.closest('button[data-action]');
-        if (!button) return;
-
-        const action = button.dataset.action;
-        const id = button.dataset.id;
-        const product = storeProducts.find((item) => item.id === id);
-        if (!product) return;
-
-        if (action === 'edit') {
-            fillProductForm(product);
-            return;
-        }
-
-        try {
-            if (action === 'toggle') {
-                await storeApi.apiRequest(`/api/admin/products/${id}`, {
-                    method: 'PUT',
-                    body: JSON.stringify({ ...product, active: !product.active })
-                });
-                await reloadForAdmin();
-                return;
-            }
-
-            if (action === 'delete') {
-                const confirmed = window.confirm(`Remover "${product.name}" da loja?`);
-                if (!confirmed) return;
-
-                await storeApi.apiRequest(`/api/admin/products/${id}`, {
-                    method: 'DELETE'
-                });
-
-                await reloadForAdmin();
-                resetProductForm();
-            }
-        } catch (error) {
-            alert(error.message);
-        }
+if (storeAdmin) {
+    storeAdmin.init({
+        getProducts: () => storeProducts,
+        reloadForAdmin,
+        reloadForPublic
     });
 }
 
@@ -563,14 +83,14 @@ async function initStore() {
         }
 
         if (status.loggedIn) {
-            setAdminLoggedIn(true);
+            if (storeAdmin) storeAdmin.setAdminLoggedIn(true);
             await reloadForAdmin();
         } else {
-            setAdminLoggedIn(false);
+            if (storeAdmin) storeAdmin.setAdminLoggedIn(false);
             await reloadForPublic();
         }
     } catch (error) {
-        setAdminLoggedIn(false);
+        if (storeAdmin) storeAdmin.setAdminLoggedIn(false);
         try {
             await reloadForPublic();
         } catch (reloadError) {
