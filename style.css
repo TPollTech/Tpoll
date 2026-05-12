@@ -1481,6 +1481,39 @@ body.dark-mode .section {
     background: #1a1a1a;
 }
 
+body.dark-mode .section.section-store-preview {
+    background: linear-gradient(160deg, #121821 0%, #14293a 55%, #17344a 100%);
+}
+
+body.dark-mode .section.section-store-preview::before {
+    background: radial-gradient(ellipse, rgba(0,168,232,0.20) 0%, rgba(0,168,232,0.08) 38%, transparent 72%);
+}
+
+body.dark-mode .section.section-store-preview .section-title {
+    color: #f2f8ff;
+}
+
+body.dark-mode .section.section-store-preview .section-subtitle,
+body.dark-mode .section.section-store-preview .store-preview-loading {
+    color: rgba(223, 236, 248, 0.82);
+}
+
+body.dark-mode .section.section-store-preview .store-preview-card {
+    background: rgba(255, 255, 255, 0.94);
+    border-color: rgba(0, 168, 232, 0.22);
+}
+
+body.dark-mode .section.section-store-preview .btn-store-cta {
+    background: rgba(255, 255, 255, 0.88);
+    color: #0b2a41;
+    border-color: rgba(0, 168, 232, 0.6);
+}
+
+body.dark-mode .section.section-store-preview .btn-store-cta:hover {
+    background: rgba(0, 168, 232, 0.22);
+    color: #e8f6ff;
+}
+
 body.dark-mode .section-alt {
     background: #242424;
 }
