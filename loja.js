@@ -50,7 +50,23 @@ async function apiRequest(url, options = {}) {
 }
 
 async function loadStoreProducts() {
-    storeProducts = await apiRequest('/api/store/products', { method: 'GET' });
+    try {
+        storeProducts = await apiRequest('/api/store/products', { method: 'GET' });
+        return;
+    } catch {
+        // fallback para ambientes estáticos (sem backend Node ativo)
+    }
+
+    const fallbackResponse = await fetch('server/store-data.json', {
+        cache: 'no-store'
+    });
+
+    if (!fallbackResponse.ok) {
+        throw new Error('Não foi possível carregar os produtos.');
+    }
+
+    const fallbackData = await fallbackResponse.json();
+    storeProducts = Array.isArray(fallbackData) ? fallbackData : [];
 }
 
 function getFilteredProducts() {
@@ -410,7 +426,15 @@ async function initStore() {
         }
     } catch {
         setAdminLoggedIn(false);
-        await reloadForPublic();
+        try {
+            await reloadForPublic();
+        } catch {
+            if (storeProductsContainer) storeProductsContainer.innerHTML = '';
+            if (storeEmpty) {
+                storeEmpty.textContent = 'Não foi possível carregar os produtos no momento.';
+                storeEmpty.hidden = false;
+            }
+        }
     }
 }
 
