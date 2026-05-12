@@ -20,6 +20,10 @@ Site institucional da TPoll com loja integrada e painel admin seguro via backend
 - O admin usa autenticação por cookie `HttpOnly` e assinatura HMAC.
 - Rotas de admin (`/api/admin/*`) só funcionam para acesso local (localhost/127.0.0.1).
 - Fora do PC local, o botão de admin não aparece na `loja.html` e o backend bloqueia tentativas forçadas.
+- Login admin tem rate-limit contra força bruta.
+- Escrita no admin (`POST`/`PUT`/`DELETE`) exige origem local válida (proteção extra contra CSRF).
+- Campos de produto e URLs de imagem passam por sanitização para reduzir risco de XSS.
+- Em produção, `TPOLL_ADMIN_PASSWORD` (mín. 8) e `TPOLL_TOKEN_SECRET` (mín. 32) são obrigatórios.
 
 ## Estrutura principal
 

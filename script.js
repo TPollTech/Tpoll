@@ -416,6 +416,27 @@ if (cookieDecline) {
 console.log('TPoll Assistência Técnica - Website carregado com sucesso! 🚀');
 
 // ── Store Preview ────────────────────────────────────────────────────────────
+function escapeHtml(value) {
+    return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function sanitizeImageUrl(value) {
+    const image = String(value || '').trim();
+    if (!image) return '';
+
+    const hasUnsafeChars = /["'<>\\]/.test(image);
+    if (hasUnsafeChars) return '';
+
+    const isAllowedRelative = image.startsWith('assets/') || image.startsWith('/assets/') || image.startsWith('./assets/');
+    const isAllowedAbsolute = image.startsWith('https://') || image.startsWith('http://');
+    return isAllowedRelative || isAllowedAbsolute ? image : '';
+}
+
 async function loadStorePreview() {
     const grid = document.getElementById('storePreviewGrid');
     if (!grid) return;
@@ -460,21 +481,29 @@ async function loadStorePreview() {
             return;
         }
 
-        grid.innerHTML = active.map(p => `
+        grid.innerHTML = active.map(p => {
+            const safeName = escapeHtml(p.name || 'Produto TPoll');
+            const safeDescription = escapeHtml(p.description || '');
+            const safeImage = sanitizeImageUrl(p.image);
+            const safePrice = Number(p.price);
+            const priceText = Number.isFinite(safePrice) ? safePrice.toFixed(2).replace('.', ',') : '0,00';
+
+            return `
             <a href="loja.html" class="store-preview-card" style="text-decoration:none">
                 <div class="store-preview-img">
-                    ${p.image
-                        ? `<img src="${p.image}" alt="${p.name}" loading="lazy">`
+                    ${safeImage
+                        ? `<img src="${safeImage}" alt="${safeName}" loading="lazy">`
                         : `<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>`
                     }
                 </div>
                 <div class="store-preview-info">
-                    <div class="store-preview-name">${p.name}</div>
-                    ${p.description ? `<div class="store-preview-desc">${p.description}</div>` : ''}
-                    <div class="store-preview-price">R$ ${Number(p.price).toFixed(2).replace('.', ',')}</div>
+                    <div class="store-preview-name">${safeName}</div>
+                    ${safeDescription ? `<div class="store-preview-desc">${safeDescription}</div>` : ''}
+                    <div class="store-preview-price">R$ ${priceText}</div>
                 </div>
             </a>
-        `).join('');
+        `;
+        }).join('');
     } catch {
         grid.innerHTML = '<p class="store-preview-loading">Não foi possível carregar os produtos.</p>';
     }

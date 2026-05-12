@@ -23,6 +23,27 @@ function formatMoneyBRL(value) {
     return `R$ ${value.toFixed(2).replace('.', ',')}`;
 }
 
+function escapeHtml(value) {
+    return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function sanitizeImageUrl(value) {
+    const image = String(value || '').trim();
+    if (!image) return '';
+
+    const hasUnsafeChars = /["'<>\\]/.test(image);
+    if (hasUnsafeChars) return '';
+
+    const isAllowedRelative = image.startsWith('assets/') || image.startsWith('/assets/') || image.startsWith('./assets/');
+    const isAllowedAbsolute = image.startsWith('https://') || image.startsWith('http://');
+    return isAllowedRelative || isAllowedAbsolute ? image : '';
+}
+
 function isLocalClient() {
     const hostname = (window.location.hostname || '').toLowerCase();
     return hostname === 'localhost' || hostname === '127.0.0.1';
@@ -146,8 +167,13 @@ function createProductCard(product) {
     const card = document.createElement('article');
     card.className = 'store-card';
 
-    const imageMarkup = product.image
-        ? `<img src="${product.image}" alt="${product.name}" class="store-card-image">`
+    const safeName = escapeHtml(product.name || '');
+    const safeCategory = escapeHtml(product.category || 'Geral');
+    const safeDescription = escapeHtml(product.description || 'Sem descrição.');
+    const safeImage = sanitizeImageUrl(product.image);
+
+    const imageMarkup = safeImage
+        ? `<img src="${safeImage}" alt="${safeName}" class="store-card-image" loading="lazy">`
         : '<div class="store-card-image-placeholder"><span class="store-placeholder-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7L6 8z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg></span></div>';
 
     const hasPromo = product.onSale && product.promoPrice > 0 && product.promoPrice < product.price;
@@ -158,9 +184,9 @@ function createProductCard(product) {
     card.innerHTML = `
         ${imageMarkup}
         <div class="store-card-content">
-            <p class="store-card-category">${product.category || 'Geral'}</p>
-            <h3>${product.name}</h3>
-            <p class="store-card-description">${product.description || 'Sem descrição.'}</p>
+            <p class="store-card-category">${safeCategory}</p>
+            <h3>${safeName}</h3>
+            <p class="store-card-description">${safeDescription}</p>
             ${priceMarkup}
             <p class="store-card-stock">Estoque: ${Math.max(0, parseInt(product.stock || 0, 10))}</p>
             <button type="button" class="store-buy-btn">Comprar pelo WhatsApp</button>
@@ -258,17 +284,33 @@ function renderAdminList() {
         const row = document.createElement('div');
         row.className = 'store-admin-item';
 
-        row.innerHTML = `
-            <div>
-                <strong>${product.name}</strong>
-                <p>${product.category || 'Geral'} • Estoque: ${Math.max(0, parseInt(product.stock || 0, 10))}</p>
-            </div>
-            <div class="store-admin-item-actions">
-                <button type="button" data-action="toggle" data-id="${product.id}" class="store-mini-btn">${product.active ? 'Desativar' : 'Ativar'}</button>
-                <button type="button" data-action="edit" data-id="${product.id}" class="store-mini-btn">Editar</button>
-                <button type="button" data-action="delete" data-id="${product.id}" class="store-mini-btn store-mini-btn-danger">Excluir</button>
-            </div>
-        `;
+        const info = document.createElement('div');
+        const title = document.createElement('strong');
+        title.textContent = String(product.name || 'Sem nome');
+        const meta = document.createElement('p');
+        meta.textContent = `${product.category || 'Geral'} • Estoque: ${Math.max(0, parseInt(product.stock || 0, 10))}`;
+        info.appendChild(title);
+        info.appendChild(meta);
+
+        const actions = document.createElement('div');
+        actions.className = 'store-admin-item-actions';
+
+        const makeButton = (action, label, extraClass) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.dataset.action = action;
+            button.dataset.id = String(product.id || '');
+            button.className = extraClass ? `store-mini-btn ${extraClass}` : 'store-mini-btn';
+            button.textContent = label;
+            return button;
+        };
+
+        actions.appendChild(makeButton('toggle', product.active ? 'Desativar' : 'Ativar'));
+        actions.appendChild(makeButton('edit', 'Editar'));
+        actions.appendChild(makeButton('delete', 'Excluir', 'store-mini-btn-danger'));
+
+        row.appendChild(info);
+        row.appendChild(actions);
 
         storeAdminList.appendChild(row);
     });

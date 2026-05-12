@@ -7,9 +7,20 @@ const app = express();
 
 const PORT = Number(process.env.PORT || 5500);
 const DATA_FILE = path.join(__dirname, 'store-data.json');
-const ADMIN_PASSWORD = process.env.TPOLL_ADMIN_PASSWORD || 'tpoll2026';
-const TOKEN_SECRET = process.env.TPOLL_TOKEN_SECRET || 'troque-este-segredo-em-producao';
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+const ADMIN_PASSWORD = process.env.TPOLL_ADMIN_PASSWORD || (IS_PRODUCTION ? '' : 'tpoll2026');
+const TOKEN_SECRET = process.env.TPOLL_TOKEN_SECRET || (IS_PRODUCTION ? '' : 'troque-este-segredo-em-producao');
 const TOKEN_TTL_SECONDS = 60 * 60 * 8;
+
+if (IS_PRODUCTION && (!ADMIN_PASSWORD || ADMIN_PASSWORD.length < 8)) {
+  throw new Error('Defina TPOLL_ADMIN_PASSWORD com pelo menos 8 caracteres.');
+}
+
+if (IS_PRODUCTION && (!TOKEN_SECRET || TOKEN_SECRET.length < 32)) {
+  throw new Error('Defina TPOLL_TOKEN_SECRET com pelo menos 32 caracteres.');
+}
+
+const rateLimitState = new Map();
 
 const defaultProducts = [
   {
@@ -46,7 +57,7 @@ function ensureDataFile() {
 function readProducts() {
   ensureDataFile();
   try {
-    const raw = fs.readFileSync(DATA_FILE, 'utf-8');
+    const raw = fs.readFileSync(DATA_FILE, 'utf-8').replace(/^\uFEFF/, '');
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [...defaultProducts];
     return parsed;
@@ -71,6 +82,43 @@ function parseCookies(req) {
     acc[key] = decodeURIComponent(value);
     return acc;
   }, {});
+}
+
+function cleanText(value, maxLength) {
+  const sanitized = String(value || '')
+    .replace(/[\u0000-\u001F\u007F]/g, '')
+    .trim();
+  return sanitized.slice(0, maxLength);
+}
+
+function normalizeImageUrl(value) {
+  const image = cleanText(value, 300);
+  if (!image) return '';
+
+  const hasUnsafeChars = /["'<>\\]/.test(image);
+  if (hasUnsafeChars) return '';
+
+  const isAllowedRelative = image.startsWith('assets/') || image.startsWith('/assets/') || image.startsWith('./assets/');
+  const isAllowedAbsolute = image.startsWith('https://') || image.startsWith('http://');
+
+  return isAllowedRelative || isAllowedAbsolute ? image : '';
+}
+
+function enforceRateLimit(key, limit, windowMs) {
+  const now = Date.now();
+  const current = rateLimitState.get(key);
+
+  if (!current || current.resetAt <= now) {
+    rateLimitState.set(key, { count: 1, resetAt: now + windowMs });
+    return true;
+  }
+
+  if (current.count >= limit) {
+    return false;
+  }
+
+  current.count += 1;
+  return true;
 }
 
 function signPayload(payloadBase64) {
@@ -118,6 +166,40 @@ function isLocalRequest(req) {
   return remote === '127.0.0.1' || remote === '::1' || remote === 'localhost';
 }
 
+function isSameOriginRequest(req) {
+  const host = String(req.headers.host || '').toLowerCase();
+  if (!host) return false;
+
+  const origin = String(req.headers.origin || '').trim();
+  const referer = String(req.headers.referer || '').trim();
+
+  const extractHost = (value) => {
+    if (!value) return '';
+    try {
+      return new URL(value).host.toLowerCase();
+    } catch {
+      return '';
+    }
+  };
+
+  if (origin) {
+    return extractHost(origin) === host;
+  }
+
+  if (referer) {
+    return extractHost(referer) === host;
+  }
+
+  return true;
+}
+
+function requireSameOrigin(req, res, next) {
+  if (!isSameOriginRequest(req)) {
+    return res.status(403).json({ error: 'Origem inválida.' });
+  }
+  return next();
+}
+
 function requireLocalAdmin(req, res, next) {
   if (!isLocalRequest(req)) {
     return res.status(403).json({ error: 'Admin disponível apenas no PC local.' });
@@ -163,15 +245,15 @@ function normalizeProduct(input) {
     return 'assets/product-images/cable.svg';
   };
 
-  const normalizedName = String(input.name || '').trim();
-  const normalizedCategory = String(input.category || '').trim();
-  const normalizedImage = String(input.image || '').trim();
+  const normalizedName = cleanText(input.name, 120);
+  const normalizedCategory = cleanText(input.category, 80);
+  const normalizedImage = normalizeImageUrl(input.image);
 
   return {
     id: input.id || crypto.randomUUID(),
     name: normalizedName,
     category: normalizedCategory,
-    description: String(input.description || '').trim(),
+    description: cleanText(input.description, 500),
     price: Math.max(0, toNumber(input.price)),
     promoPrice: Math.max(0, toNumber(input.promoPrice)),
     onSale: Boolean(input.onSale),
@@ -180,6 +262,17 @@ function normalizeProduct(input) {
     active: Boolean(input.active)
   };
 }
+
+app.disable('x-powered-by');
+
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+  next();
+});
 
 app.use(express.json({ limit: '1mb' }));
 
@@ -202,9 +295,14 @@ app.get('/api/admin/status', (req, res) => {
   return res.json({ adminEnabled: true, loggedIn });
 });
 
-app.post('/api/admin/login', (req, res) => {
+app.post('/api/admin/login', requireSameOrigin, (req, res) => {
   if (!isLocalRequest(req)) {
     return res.status(403).json({ error: 'Admin disponível apenas no PC local.' });
+  }
+
+  const requester = (req.socket.remoteAddress || 'unknown').replace('::ffff:', '');
+  if (!enforceRateLimit(`admin-login:${requester}`, 8, 10 * 60 * 1000)) {
+    return res.status(429).json({ error: 'Muitas tentativas. Tente novamente em alguns minutos.' });
   }
 
   const password = String(req.body?.password || '');
@@ -221,7 +319,7 @@ app.post('/api/admin/login', (req, res) => {
   return res.json({ ok: true });
 });
 
-app.post('/api/admin/logout', (req, res) => {
+app.post('/api/admin/logout', requireSameOrigin, (req, res) => {
   res.setHeader('Set-Cookie', 'tpoll_admin_token=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0');
   return res.json({ ok: true });
 });
@@ -230,7 +328,7 @@ app.get('/api/admin/products', requireLocalAdmin, (req, res) => {
   res.json(readProducts());
 });
 
-app.post('/api/admin/products', requireLocalAdmin, (req, res) => {
+app.post('/api/admin/products', requireSameOrigin, requireLocalAdmin, (req, res) => {
   const product = normalizeProduct(req.body || {});
 
   if (!product.name) {
@@ -247,7 +345,7 @@ app.post('/api/admin/products', requireLocalAdmin, (req, res) => {
   return res.status(201).json(product);
 });
 
-app.put('/api/admin/products/:id', requireLocalAdmin, (req, res) => {
+app.put('/api/admin/products/:id', requireSameOrigin, requireLocalAdmin, (req, res) => {
   const id = String(req.params.id || '');
   const products = readProducts();
   const index = products.findIndex((item) => item.id === id);
@@ -270,7 +368,7 @@ app.put('/api/admin/products/:id', requireLocalAdmin, (req, res) => {
   return res.json(updated);
 });
 
-app.delete('/api/admin/products/:id', requireLocalAdmin, (req, res) => {
+app.delete('/api/admin/products/:id', requireSameOrigin, requireLocalAdmin, (req, res) => {
   const id = String(req.params.id || '');
   const products = readProducts();
   const next = products.filter((item) => item.id !== id);
