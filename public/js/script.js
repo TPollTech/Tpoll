@@ -547,7 +547,7 @@ async function loadStorePreview() {
         }
 
         if (!products) {
-            const fallbackPaths = ['assets/data/products.json', 'server/store-data.json'];
+            const fallbackPaths = ['../assets/data/products.json'];
 
             for (const fallbackPath of fallbackPaths) {
                 try {
