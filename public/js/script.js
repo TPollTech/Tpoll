@@ -434,9 +434,15 @@ function sanitizeImageUrl(value) {
     const hasUnsafeChars = /["'<>\\]/.test(image);
     if (hasUnsafeChars) return '';
 
-    const isAllowedRelative = image.startsWith('assets/') || image.startsWith('/assets/') || image.startsWith('./assets/');
     const isAllowedAbsolute = image.startsWith('https://') || image.startsWith('http://');
-    return isAllowedRelative || isAllowedAbsolute ? image : '';
+    if (isAllowedAbsolute) return image;
+
+    if (image.startsWith('../assets/')) return image;
+    if (image.startsWith('assets/')) return `../${image}`;
+    if (image.startsWith('./assets/')) return `../${image.slice(2)}`;
+    if (image.startsWith('/assets/')) return `..${image}`;
+
+    return '';
 }
 
 function canProcessImageForBgRemoval(imageElement) {
