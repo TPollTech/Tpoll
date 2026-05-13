@@ -1,0 +1,606 @@
+// Smooth scroll para links âncora
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            // Fecha menu mobile se estiver aberto
+            navMenu.classList.remove('active');
+            navToggle.classList.remove('active');
+            
+            target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    });
+});
+
+// Navigation - Mobile Toggle
+const navToggle = document.getElementById('navToggle');
+const navMenu = document.getElementById('navMenu');
+
+navToggle.addEventListener('click', () => {
+    navMenu.classList.toggle('active');
+    navToggle.classList.toggle('active');
+});
+
+// Navigation - Scroll Effect
+const navbar = document.getElementById('navbar');
+let lastScroll = 0;
+const heroSection = document.querySelector('.hero');
+let ticking = false;
+let currentScrollY = 0;
+
+// Detect if device supports smooth parallax
+const supportsParallax = !window.matchMedia('(prefers-reduced-motion: reduce)').matches && 
+                         !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+function updateHeroParallax() {
+    if (!heroSection || !supportsParallax) return;
+
+    // Better parallax calculation: smooth speed factor (0.5 = half the scroll speed)
+    const parallaxOffset = currentScrollY * 0.5;
+    
+    // Use transform3d for better GPU acceleration
+    heroSection.style.setProperty('--hero-parallax-offset', `${parallaxOffset}px`);
+}
+
+function onScroll() {
+    currentScrollY = window.pageYOffset || 0;
+    
+    if (navbar && currentScrollY > 50) {
+        navbar.classList.add('scrolled');
+    } else if (navbar) {
+        navbar.classList.remove('scrolled');
+    }
+    
+    if (!ticking && supportsParallax) {
+        ticking = true;
+        requestAnimationFrame(() => {
+            updateHeroParallax();
+            ticking = false;
+        });
+    }
+    
+    // Active navigation link based on scroll position
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-link');
+    let currentSection = '';
+    
+    sections.forEach(section => {
+        const sectionTop = section.offsetTop - 100;
+        if (currentScrollY >= sectionTop) {
+            currentSection = section.getAttribute('id');
+        }
+    });
+    
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${currentSection}`) {
+            link.classList.add('active');
+        }
+    });
+    
+    // Back to Top Button
+    const backToTopBtn = document.getElementById('backToTop');
+    if (backToTopBtn) {
+        if (currentScrollY > 400) {
+            backToTopBtn.classList.add('visible');
+        } else {
+            backToTopBtn.classList.remove('visible');
+        }
+    }
+
+    lastScroll = currentScrollY;
+}
+
+window.addEventListener('scroll', onScroll, { passive: true });
+updateHeroParallax();
+
+// FAQ Accordion
+const faqItems = document.querySelectorAll('.faq-item');
+
+faqItems.forEach(item => {
+    const question = item.querySelector('.faq-question');
+    
+    question.addEventListener('click', () => {
+        const isActive = item.classList.contains('active');
+        
+        // Fecha todos os outros itens
+        faqItems.forEach(faq => faq.classList.remove('active'));
+        
+        // Toggle do item clicado
+        if (!isActive) {
+            item.classList.add('active');
+        }
+    });
+});
+
+// Animação de entrada dos elementos quando aparecem na tela
+const observerOptions = {
+    threshold: 0.05,
+    rootMargin: '0px 0px -30px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, idx) => {
+        if (entry.isIntersecting) {
+            // Add staggered animation delay for smoother cascade effect
+            entry.target.style.animationDelay = `${idx * 0.08}s`;
+            entry.target.classList.add('fade-in-visible');
+            observer.unobserve(entry.target);
+        }
+    });
+}, observerOptions);
+
+// Observar cards de serviço, benefícios e depoimentos
+const animatedElements = document.querySelectorAll(
+    '.service-card, .benefit-card, .testimonial-card, .process-step, .faq-item'
+);
+
+animatedElements.forEach(el => {
+    observer.observe(el);
+});
+
+// Back to Top Button - Click Handler
+const backToTopBtn = document.getElementById('backToTop');
+if (backToTopBtn) {
+    backToTopBtn.addEventListener('click', () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+}
+
+// Stats Counter Animation
+const statsObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const statNumbers = entry.target.querySelectorAll('.stat-number');
+            statNumbers.forEach(stat => {
+                const target = parseInt(stat.getAttribute('data-target'));
+                const duration = 2000;
+                const increment = target / (duration / 16);
+                let current = 0;
+                
+                const updateCounter = () => {
+                    current += increment;
+                    if (current < target) {
+                        stat.textContent = Math.floor(current);
+                        requestAnimationFrame(updateCounter);
+                    } else {
+                        stat.textContent = target;
+                    }
+                };
+                
+                updateCounter();
+            });
+            statsObserver.unobserve(entry.target);
+        }
+    });
+}, { threshold: 0.5 });
+
+const statsSection = document.querySelector('.stats-section');
+if (statsSection) {
+    statsObserver.observe(statsSection);
+}
+
+// Contact Form - Send via WhatsApp
+const contactForm = document.getElementById('contactForm');
+
+if (contactForm) {
+    contactForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const nome = document.getElementById('nome').value.trim();
+        const telefone = document.getElementById('telefone').value.trim();
+        const aparelho = document.getElementById('aparelho').value;
+        const modelo = document.getElementById('modelo').value.trim();
+        const problema = document.getElementById('problema').value.trim();
+        
+        // Montar mensagem para WhatsApp
+        let message = `Olá! Gostaria de solicitar um orçamento.\n\n`;
+        message += `*Nome:* ${nome}\n`;
+        message += `*Telefone:* ${telefone}\n`;
+        message += `*Tipo de Aparelho:* ${aparelho}\n`;
+        if (modelo) {
+            message += `*Marca/Modelo:* ${modelo}\n`;
+        }
+        message += `\n*Problema:*\n${problema}`;
+        
+        // Codifica a mensagem para URL
+        const encodedMessage = encodeURIComponent(message);
+        
+        // Abre o WhatsApp com a mensagem
+        const whatsappURL = `https://wa.me/5555996765404?text=${encodedMessage}`;
+        window.open(whatsappURL, '_blank');
+    });
+}
+
+// Phone input mask
+const telefoneInput = document.getElementById('telefone');
+if (telefoneInput) {
+    telefoneInput.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 11) value = value.slice(0, 11);
+        
+        if (value.length > 0) {
+            value = '(' + value;
+        }
+        if (value.length > 3) {
+            value = value.slice(0, 3) + ') ' + value.slice(3);
+        }
+        if (value.length > 10) {
+            value = value.slice(0, 10) + '-' + value.slice(10);
+        }
+        
+        e.target.value = value;
+    });
+}
+
+// Dark Mode Toggle
+const themeToggle = document.getElementById('themeToggle');
+const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+
+// Check saved preference or system preference
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark.matches)) {
+        document.body.classList.add('dark-mode');
+    }
+}
+
+initTheme();
+
+if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        const isDark = document.body.classList.contains('dark-mode');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    });
+}
+
+// Typewriter Effect
+const typewriterElement = document.getElementById('typewriter');
+const typewriterTexts = [
+    'Conserto de celulares com garantia',
+    'Reparo de notebooks e computadores',
+    'Manutenção de eletrônicos em geral',
+    'Diagnóstico gratuito e rápido',
+    'Qualidade, agilidade e confiança'
+];
+
+let textIndex = 0;
+let charIndex = 0;
+let isDeleting = false;
+let typeSpeed = 80;
+
+function typeWriter() {
+    if (!typewriterElement) return;
+    
+    const currentText = typewriterTexts[textIndex];
+    
+    if (isDeleting) {
+        typewriterElement.textContent = currentText.substring(0, charIndex - 1);
+        charIndex--;
+        typeSpeed = 40;
+    } else {
+        typewriterElement.textContent = currentText.substring(0, charIndex + 1);
+        charIndex++;
+        typeSpeed = 80;
+    }
+    
+    if (!isDeleting && charIndex === currentText.length) {
+        isDeleting = true;
+        typeSpeed = 2000; // Pause at end
+    } else if (isDeleting && charIndex === 0) {
+        isDeleting = false;
+        textIndex = (textIndex + 1) % typewriterTexts.length;
+        typeSpeed = 500; // Pause before new word
+    }
+    
+    setTimeout(typeWriter, typeSpeed);
+}
+
+// Start typewriter after a short delay
+setTimeout(typeWriter, 1000);
+
+// Price Calculator
+const calcDeviceOptions = document.querySelectorAll('#calcDevice .calc-option');
+const calcServiceOptions = document.querySelectorAll('#calcService .calc-option');
+const calcResult = document.getElementById('calcResult');
+
+let selectedDevice = null;
+let selectedService = null;
+
+function isServiceCompatible(serviceOption, deviceOption) {
+    if (!serviceOption || !deviceOption) return true;
+
+    const compatibleDevices = (serviceOption.dataset.devices || '')
+        .split(',')
+        .map(device => device.trim())
+        .filter(Boolean);
+
+    if (compatibleDevices.length === 0) return true;
+
+    return compatibleDevices.includes(deviceOption.dataset.value);
+}
+
+function updateServiceAvailability() {
+    calcServiceOptions.forEach(option => {
+        const compatible = !selectedDevice || isServiceCompatible(option, selectedDevice);
+
+        option.disabled = !compatible;
+        option.classList.toggle('is-disabled', !compatible);
+
+        if (!compatible && option === selectedService) {
+            option.classList.remove('selected');
+            selectedService = null;
+        }
+    });
+}
+
+function updateCalculatorResult() {
+    if (!calcResult) return;
+    
+    const resultValue = calcResult.querySelector('.result-value');
+    
+    if (selectedDevice && selectedService) {
+        const basePrice = parseFloat(selectedDevice.dataset.base);
+        const multiplier = parseFloat(selectedService.dataset.mult);
+        const minPrice = Math.round(basePrice * multiplier);
+        const maxPrice = Math.round(minPrice * 1.8);
+        
+        resultValue.innerHTML = `R$ ${minPrice} <span style="font-size: 1.2rem; font-weight: 400;">a</span> R$ ${maxPrice}`;
+    } else if (selectedDevice || selectedService) {
+        resultValue.textContent = 'Selecione ambas opções';
+    } else {
+        resultValue.textContent = 'Selecione as opções';
+    }
+}
+
+calcDeviceOptions.forEach(option => {
+    option.addEventListener('click', () => {
+        calcDeviceOptions.forEach(opt => opt.classList.remove('selected'));
+        option.classList.add('selected');
+        selectedDevice = option;
+        updateServiceAvailability();
+        updateCalculatorResult();
+    });
+});
+
+calcServiceOptions.forEach(option => {
+    option.addEventListener('click', () => {
+        if (option.disabled) return;
+
+        calcServiceOptions.forEach(opt => opt.classList.remove('selected'));
+        option.classList.add('selected');
+        selectedService = option;
+        updateCalculatorResult();
+    });
+});
+
+updateServiceAvailability();
+
+// Cookie Banner
+const cookieBanner = document.getElementById('cookieBanner');
+const cookieAccept = document.getElementById('cookieAccept');
+const cookieDecline = document.getElementById('cookieDecline');
+
+function showCookieBanner() {
+    const consent = localStorage.getItem('cookieConsent');
+    if (!consent && cookieBanner) {
+        setTimeout(() => {
+            cookieBanner.classList.add('visible');
+        }, 2000);
+    }
+}
+
+showCookieBanner();
+
+if (cookieAccept) {
+    cookieAccept.addEventListener('click', () => {
+        localStorage.setItem('cookieConsent', 'accepted');
+        cookieBanner.classList.remove('visible');
+    });
+}
+
+if (cookieDecline) {
+    cookieDecline.addEventListener('click', () => {
+        localStorage.setItem('cookieConsent', 'declined');
+        cookieBanner.classList.remove('visible');
+    });
+}
+
+// Log simples para debug (pode ser removido em produção)
+console.log('TPoll Assistência Técnica - Website carregado com sucesso! 🚀');
+
+// ── Store Preview ────────────────────────────────────────────────────────────
+function escapeHtml(value) {
+    return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function sanitizeImageUrl(value) {
+    const image = String(value || '').trim();
+    if (!image) return '';
+
+    const hasUnsafeChars = /["'<>\\]/.test(image);
+    if (hasUnsafeChars) return '';
+
+    const isAllowedRelative = image.startsWith('assets/') || image.startsWith('/assets/') || image.startsWith('./assets/');
+    const isAllowedAbsolute = image.startsWith('https://') || image.startsWith('http://');
+    return isAllowedRelative || isAllowedAbsolute ? image : '';
+}
+
+function canProcessImageForBgRemoval(imageElement) {
+    const src = String(imageElement.getAttribute('src') || imageElement.src || '');
+    if (!src) return false;
+
+    if (src.startsWith('data:')) return true;
+
+    try {
+        const url = new URL(src, window.location.href);
+        return url.origin === window.location.origin;
+    } catch {
+        return false;
+    }
+}
+
+function removeLightBackground(imageElement) {
+    if (!imageElement || imageElement.dataset.bgProcessed === '1') return;
+
+    const process = () => {
+        if (!canProcessImageForBgRemoval(imageElement)) {
+            imageElement.dataset.bgProcessed = '1';
+            return;
+        }
+
+        const width = imageElement.naturalWidth;
+        const height = imageElement.naturalHeight;
+        if (!width || !height || width * height > 5000000) {
+            imageElement.dataset.bgProcessed = '1';
+            return;
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const context = canvas.getContext('2d', { willReadFrequently: true });
+        if (!context) {
+            imageElement.dataset.bgProcessed = '1';
+            return;
+        }
+
+        try {
+            context.drawImage(imageElement, 0, 0, width, height);
+            const imageData = context.getImageData(0, 0, width, height);
+            const data = imageData.data;
+
+            for (let index = 0; index < data.length; index += 4) {
+                const red = data[index];
+                const green = data[index + 1];
+                const blue = data[index + 2];
+                const alpha = data[index + 3];
+                if (alpha === 0) continue;
+
+                const max = Math.max(red, green, blue);
+                const min = Math.min(red, green, blue);
+                const isNeutral = (max - min) <= 22;
+
+                if (isNeutral && max >= 240) {
+                    data[index + 3] = 0;
+                    continue;
+                }
+
+                if (isNeutral && max >= 220) {
+                    data[index + 3] = Math.round(alpha * 0.35);
+                }
+            }
+
+            context.putImageData(imageData, 0, 0);
+            imageElement.src = canvas.toDataURL('image/png');
+        } catch {
+            // mantém imagem original caso não seja possível processar
+        } finally {
+            imageElement.dataset.bgProcessed = '1';
+        }
+    };
+
+    if (imageElement.complete) {
+        process();
+    } else {
+        imageElement.addEventListener('load', process, { once: true });
+        imageElement.addEventListener('error', () => {
+            imageElement.dataset.bgProcessed = '1';
+        }, { once: true });
+    }
+}
+
+function enhancePreviewImages(container) {
+    if (!container) return;
+    const images = container.querySelectorAll('.store-preview-img img');
+    images.forEach((imageElement) => removeLightBackground(imageElement));
+}
+
+async function loadStorePreview() {
+    const grid = document.getElementById('storePreviewGrid');
+    if (!grid) return;
+
+    try {
+        let products = null;
+
+        try {
+            const apiResponse = await fetch('/api/store/products', { cache: 'no-store' });
+            if (apiResponse.ok) {
+                const apiData = await apiResponse.json();
+                if (Array.isArray(apiData)) products = apiData;
+            }
+        } catch (apiError) {
+            // fallback estático abaixo
+        }
+
+        if (!products) {
+            const fallbackPaths = ['assets/data/products.json', 'server/store-data.json'];
+
+            for (const fallbackPath of fallbackPaths) {
+                try {
+                    const fallbackResponse = await fetch(fallbackPath, { cache: 'no-store' });
+                    if (!fallbackResponse.ok) continue;
+
+                    const fallbackData = await fallbackResponse.json();
+                    if (Array.isArray(fallbackData)) {
+                        products = fallbackData;
+                        break;
+                    }
+                } catch (fallbackError) {
+                    // tenta próximo fallback
+                }
+            }
+        }
+
+        if (!products) throw new Error('No data source available');
+
+        const active = products.filter(p => p.active !== false).slice(0, 4);
+        if (active.length === 0) {
+            grid.innerHTML = '<p class="store-preview-loading">Nenhum produto disponível no momento.</p>';
+            return;
+        }
+
+        grid.innerHTML = active.map(p => {
+            const safeName = escapeHtml(p.name || 'Produto TPoll');
+            const safeDescription = escapeHtml(p.description || '');
+            const safeImage = sanitizeImageUrl(p.image);
+            const safePrice = Number(p.price);
+            const priceText = Number.isFinite(safePrice) ? safePrice.toFixed(2).replace('.', ',') : '0,00';
+
+            return `
+            <a href="loja.html" class="store-preview-card" style="text-decoration:none">
+                <div class="store-preview-img">
+                    ${safeImage
+                        ? `<img src="${safeImage}" alt="${safeName}" loading="lazy">`
+                        : `<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>`
+                    }
+                </div>
+                <div class="store-preview-info">
+                    <div class="store-preview-name">${safeName}</div>
+                    ${safeDescription ? `<div class="store-preview-desc">${safeDescription}</div>` : ''}
+                    <div class="store-preview-price">R$ ${priceText}</div>
+                </div>
+            </a>
+        `;
+        }).join('');
+
+        enhancePreviewImages(grid);
+    } catch {
+        grid.innerHTML = '<p class="store-preview-loading">Não foi possível carregar os produtos.</p>';
+    }
+}
+
+loadStorePreview();

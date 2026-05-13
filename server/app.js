@@ -2,6 +2,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const compression = require('compression');
 const authRoutes = require('./modules/auth/routes/authRoutes');
 const { verifyUserToken } = require('./modules/auth/services/authService');
 const activityService = require('./modules/auth/services/activityService');
@@ -268,6 +269,39 @@ function normalizeProduct(input) {
 
 app.disable('x-powered-by');
 
+// ─── Otimizações de Performance ────────────────────────────────────────────
+
+// Compressão Gzip
+app.use(compression({
+  filter: (req, res) => {
+    if (req.headers['x-no-compression']) return false;
+    return compression.filter(req, res);
+  },
+  level: 6
+}));
+
+// Cache Headers Inteligente
+app.use((req, res, next) => {
+  const pathname = req.path;
+  
+  // Assets estáticos - cache longo (1 ano)
+  if (/\.(js|css|png|jpg|jpeg|gif|ico|webp|woff2|ttf|eot|svg)$/i.test(pathname)) {
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+  }
+  // HTML - cache curto (1 hora)
+  else if (pathname.endsWith('.html') || pathname === '/') {
+    res.setHeader('Cache-Control', 'public, max-age=3600, must-revalidate');
+  }
+  // API - sem cache
+  else if (pathname.startsWith('/api/')) {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  }
+  
+  next();
+});
+
+// ─── Security Headers ─────────────────────────────────────────────────────
+
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
@@ -415,7 +449,7 @@ app.delete('/api/admin/products/:id', requireSameOrigin, requireLocalAdmin, (req
   return res.json({ ok: true });
 });
 
-app.use(express.static(path.join(__dirname, '..')));
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // ── Auth page routes ──────────────────────────────────────────────────────
 const authPages = {
@@ -434,7 +468,7 @@ app.get('/painel-admin', (req, res) => {
 });
 
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'index.html'));
+  res.sendFile(path.join(__dirname, '..', 'public', 'html', 'index.html'));
 });
 
 ensureDataFile();

@@ -31,8 +31,7 @@
         }
 
         const fallbackCandidates = [
-            'assets/data/products.json',
-            'server/store-data.json'
+            '/assets/data/products.json'
         ];
 
         for (const fallbackPath of fallbackCandidates) {
