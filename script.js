@@ -30,35 +30,44 @@ const navbar = document.getElementById('navbar');
 let lastScroll = 0;
 const heroSection = document.querySelector('.hero');
 let parallaxFramePending = false;
+let ticking = false;
+let currentScrollY = 0;
+
+// Detect if device supports smooth parallax
+const supportsParallax = !window.matchMedia('(prefers-reduced-motion: reduce)').matches && 
+                         !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
 function updateHeroParallax() {
-    if (!heroSection) return;
+    if (!heroSection || !supportsParallax) return;
 
-    const yOffset = window.pageYOffset || 0;
-    const parallaxOffset = Math.min(yOffset * 0.24, 140);
+    // Better parallax calculation: smooth speed factor (0.5 = half the scroll speed)
+    const parallaxOffset = currentScrollY * 0.5;
+    
+    // Use transform3d for better GPU acceleration
     heroSection.style.setProperty('--hero-parallax-offset', `${parallaxOffset}px`);
 }
 
-window.addEventListener('scroll', () => {
-    const currentScroll = window.pageYOffset;
+function onScroll() {
+    currentScrollY = window.pageYOffset || 0;
     
-    if (currentScroll > 50) {
+    if (currentScrollY > 50) {
         navbar.classList.add('scrolled');
     } else {
         navbar.classList.remove('scrolled');
     }
     
-    if (!parallaxFramePending) {
-        parallaxFramePending = true;
+    if (!ticking && supportsParallax) {
+        ticking = true;
         requestAnimationFrame(() => {
             updateHeroParallax();
-            parallaxFramePending = false;
+            ticking = false;
         });
     }
 
-    lastScroll = currentScroll;
-});
+    lastScroll = currentScrollY;
+}
 
+window.addEventListener('scroll', onScroll);
 updateHeroParallax();
 
 // FAQ Accordion

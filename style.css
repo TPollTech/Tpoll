@@ -231,15 +231,17 @@ body {
     background: radial-gradient(circle at 20% 50%, rgba(0, 168, 232, 0.15) 0%, transparent 50%),
                 radial-gradient(circle at 80% 80%, rgba(0, 168, 232, 0.1) 0%, transparent 50%);
     pointer-events: none;
-    transform: translateY(var(--hero-parallax-offset));
+    transform: translate3d(0, var(--hero-parallax-offset), 0);
     will-change: transform;
+    backface-visibility: hidden;
 }
 
 .hero .container {
     position: relative;
     z-index: 1;
-    transform: translateY(calc(var(--hero-parallax-offset) * -0.12));
+    transform: translate3d(0, 0, 0);
     will-change: transform;
+    backface-visibility: hidden;
 }
 
 .logo-container {
