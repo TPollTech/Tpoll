@@ -380,6 +380,14 @@ body {
     text-align: center;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    will-change: opacity, transform;
+}
+
+.service-card.fade-in-visible {
+    animation: fadeInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 .service-card:hover {
@@ -428,6 +436,10 @@ body {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     border-top: 3px solid #00A8E8;
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    will-change: opacity, transform;
 }
 
 .benefit-card:hover {
@@ -481,7 +493,10 @@ body {
     max-width: 200px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     transition: transform 0.3s ease;
-}
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    will-change: opacity, transform;
 
 .process-step:hover {
     transform: translateY(-5px);
@@ -1106,6 +1121,10 @@ body {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
     overflow: hidden;
     transition: box-shadow 0.3s ease;
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    will-change: opacity, transform;
 }
 
 .faq-item:hover {

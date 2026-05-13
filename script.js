@@ -91,22 +91,16 @@ faqItems.forEach(item => {
 
 // Animação de entrada dos elementos quando aparecem na tela
 const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
+    threshold: 0.05,
+    rootMargin: '0px 0px -30px 0px'
 };
 
 const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
+    entries.forEach((entry, idx) => {
         if (entry.isIntersecting) {
-            entry.target.style.opacity = '0';
-            entry.target.style.transform = 'translateY(30px)';
-            
-            setTimeout(() => {
-                entry.target.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
-            }, 100);
-            
+            // Add staggered animation delay for smoother cascade effect
+            entry.target.style.animationDelay = `${idx * 0.08}s`;
+            entry.target.classList.add('fade-in-visible');
             observer.unobserve(entry.target);
         }
     });
