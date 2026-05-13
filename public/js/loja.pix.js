@@ -101,6 +101,7 @@
                     `*Valor pago:* ${formatMoneyBRL(finalPrice)}`,
                     `*ID da transação:* ${txId}`,
                     '',
+                    'Segue o comprovante em anexo.',
                     'Poderia confirmar o recebimento e combinar a entrega?'
                 ].join('\n');
                 window.open(`https://wa.me/5555996765404?text=${encodeURIComponent(message)}`, '_blank');
