@@ -481,6 +481,31 @@ textarea.ap-input { resize: vertical; min-height: 60px; }
 }
 @keyframes ap-spin { to { transform: rotate(360deg); } }
 
+/* PWA INSTALL BANNER --------------------------------------- */
+.ap-install-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 14px 16px;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    box-shadow: 0 -4px 16px rgba(0,0,0,.4);
+    animation: ap-slide-up .3s ease;
+}
+@keyframes ap-slide-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.ap-install-content { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.ap-install-icon { border-radius: 8px; flex-shrink: 0; }
+.ap-install-text { display: flex; flex-direction: column; min-width: 0; }
+.ap-install-text strong { font-size: 0.875rem; white-space: nowrap; }
+.ap-install-text span { font-size: 0.75rem; color: var(--text2); white-space: nowrap; }
+.ap-install-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
 /* RESPONSIVE ----------------------------------------------- */
 @media (min-width: 640px) {
     .ap-stats-grid { grid-template-columns: repeat(3, 1fr); }

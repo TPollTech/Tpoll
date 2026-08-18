@@ -400,6 +400,45 @@
         navigator.serviceWorker.register('adminpanel/sw.js').catch(() => {});
     }
 
+    // PWA Install prompt
+    let deferredPrompt = null;
+    const installBanner = $('#installBanner');
+    const installBtn = $('#installBtn');
+    const installDismiss = $('#installDismiss');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        // Show banner after 2 seconds if not already installed
+        if (!localStorage.getItem('tpoll_install_dismissed')) {
+            setTimeout(() => { if (installBanner) installBanner.hidden = false; }, 2000);
+        }
+    });
+
+    if (installBtn) {
+        installBtn.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') toast('App instalado!');
+            deferredPrompt = null;
+            installBanner.hidden = true;
+        });
+    }
+
+    if (installDismiss) {
+        installDismiss.addEventListener('click', () => {
+            localStorage.setItem('tpoll_install_dismissed', '1');
+            installBanner.hidden = true;
+        });
+    }
+
+    window.addEventListener('appinstalled', () => {
+        deferredPrompt = null;
+        installBanner.hidden = true;
+        toast('App instalado na tela inicial!');
+    });
+
     /* ------------------------------------------------------- */
     /*  Init                                                    */
     /* ------------------------------------------------------- */
