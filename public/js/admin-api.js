@@ -88,10 +88,10 @@
     /*  Token check for writes                                  */
     /* ------------------------------------------------------- */
     function requireToken() {
-        if (isLocal) return; // local server handles auth
+        if (isLocal) return;
         const token = getToken();
         if (!token) {
-            throw new Error('Para cadastrar/editar produtos, salve um token GitHub. Vá em Configurações no painel.');
+            throw new Error('Salve um token GitHub na aba Config antes de cadastrar/editar produtos.');
         }
     }
 
@@ -213,7 +213,11 @@
                 active: product.active !== false,
             };
             products.unshift(newProduct);
-            await ghUpdateFile(DATA_PATH, JSON.stringify(products, null, 2), `Admin: criou produto "${newProduct.name}"`, _gh.sha);
+            try {
+                await ghUpdateFile(DATA_PATH, JSON.stringify(products, null, 2), `Admin: criou produto "${newProduct.name}"`, _gh.sha);
+            } catch (err) {
+                throw new Error('Erro ao salvar no GitHub: ' + err.message);
+            }
             return newProduct;
         },
 
