@@ -22,9 +22,9 @@
                 <img src="/TPoll%20Logo.png" alt="TPoll" width="48" height="48">
             </div>
             <h1 class="login-title">TPoll Admin</h1>
-            <p class="login-subtitle">Insira o PIN para acessar o painel</p>
+            <p class="login-subtitle">Insira o PIN ou token GitHub para acessar</p>
             <form id="loginForm" class="login-form" autocomplete="off">
-                <input type="password" id="pinInput" class="login-input" placeholder="PIN" maxlength="20" inputmode="numeric" autofocus>
+                <input type="text" id="pinInput" class="login-input" placeholder="PIN ou token GitHub" maxlength="100" autofocus>
                 <div id="loginError" class="login-error" hidden> PIN inválido. Tente novamente.</div>
                 <button type="submit" class="login-btn">Entrar</button>
             </form>
@@ -37,6 +37,7 @@
             <div class="ap-header-left">
                 <img src="/TPoll%20Logo.png" alt="" width="28" height="28">
                 <span class="ap-header-title">Admin</span>
+                <span id="userInfo" class="ap-user-info"></span>
             </div>
             <div class="ap-header-right">
                 <button type="button" id="btnStats" class="ap-icon-btn" title="Estatísticas">
@@ -177,6 +178,7 @@
         </section>
     </div>
 
+    <script src="/js/admin-api.js"></script>
     <script src="/js/admin-panel.js"></script>
 </body>
 </html>

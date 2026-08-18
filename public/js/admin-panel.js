@@ -1,8 +1,11 @@
 /* =========================================================
    TPoll Admin Panel — /adminpanel
+   Works both locally (Express server) and remotely (GitHub API)
    ========================================================= */
 (function () {
     'use strict';
+
+    const api = window.TPollAdminApi;
 
     /* ------------------------------------------------------- */
     /*  Helpers                                                 */
@@ -20,46 +23,29 @@
         t._timer = setTimeout(() => t.classList.remove('show'), 2500);
     }
 
-    async function api(path, opts = {}) {
-        const res = await fetch(path, {
-            headers: { 'Content-Type': 'application/json', ...opts.headers },
-            ...opts,
-        });
-        if (res.status === 401) { showLogin(); throw new Error('unauthorized'); }
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Erro na requisição');
-        return data;
-    }
-
-    async function apiUpload(file) {
-        const fd = new FormData();
-        fd.append('image', file);
-        const res = await fetch('/api/adminpanel/upload', { method: 'POST', body: fd });
-        if (res.status === 401) { showLogin(); throw new Error('unauthorized'); }
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Erro no upload');
-        return data.url;
-    }
+    function escHtml(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
 
     /* ------------------------------------------------------- */
     /*  DOM refs                                                */
     /* ------------------------------------------------------- */
-    const loginScreen  = $('#loginScreen');
-    const adminPanel   = $('#adminPanel');
-    const loginForm    = $('#loginForm');
-    const pinInput     = $('#pinInput');
-    const loginError   = $('#loginError');
-    const tabs         = $$('.ap-tab');
-    const tabContents  = $$('.ap-tab-content');
-    const productsList = $('#productsList');
-    const productsEmpty= $('#productsEmpty');
+    const loginScreen     = $('#loginScreen');
+    const adminPanel      = $('#adminPanel');
+    const loginForm       = $('#loginForm');
+    const pinInput        = $('#pinInput');
+    const loginError      = $('#loginError');
+    const loginSubtitle   = $('.login-subtitle');
+    const tabs            = $$('.ap-tab');
+    const tabContents     = $$('.ap-tab-content');
+    const productsList    = $('#productsList');
+    const productsEmpty   = $('#productsEmpty');
     const productFormSection = $('#productFormSection');
-    const productForm  = $('#productForm');
-    const formTitle    = $('#formTitle');
-    const statsGrid    = $('#statsGrid');
-    const logsList     = $('#logsList');
-    const logsEmpty    = $('#logsEmpty');
-    const deployStatus = $('#deployStatus');
+    const productForm     = $('#productForm');
+    const formTitle       = $('#formTitle');
+    const statsGrid       = $('#statsGrid');
+    const logsList        = $('#logsList');
+    const logsEmpty       = $('#logsEmpty');
+    const deployStatus    = $('#deployStatus');
+    const userInfoEl      = $('#userInfo');
 
     /* ------------------------------------------------------- */
     /*  Auth                                                    */
@@ -74,20 +60,27 @@
         pinInput.focus();
     }
 
-    function showPanel() {
+    function showPanel(user) {
         loginScreen.hidden = true;
         loginScreen.style.display = 'none';
         adminPanel.hidden = false;
         adminPanel.style.display = '';
+        if (userInfoEl && user) userInfoEl.textContent = user;
         switchTab('products');
     }
 
     async function checkSession() {
         try {
-            const data = await api('/api/adminpanel/status');
-            if (data.loggedIn) { showPanel(); loadProducts(); }
-            else showLogin();
-        } catch { showLogin(); }
+            const data = await api.status();
+            if (data.loggedIn) {
+                showPanel(data.user || 'Admin');
+                loadProducts();
+            } else {
+                showLogin();
+            }
+        } catch {
+            showLogin();
+        }
     }
 
     loginForm.addEventListener('submit', async (e) => {
@@ -96,13 +89,12 @@
         const pin = pinInput.value.trim();
         if (!pin) return;
         try {
-            await api('/api/adminpanel/login', {
-                method: 'POST',
-                body: JSON.stringify({ pin }),
-            });
-            showPanel();
+            const result = await api.login(pin);
+            const user = await api.getUser();
+            showPanel(user ? user.login : 'Admin');
             loadProducts();
-        } catch {
+        } catch (err) {
+            loginError.textContent = ' ' + (err.message || 'Erro ao entrar.');
             loginError.hidden = false;
             pinInput.value = '';
             pinInput.focus();
@@ -110,7 +102,7 @@
     });
 
     $('#btnLogout').addEventListener('click', async () => {
-        try { await api('/api/adminpanel/logout', { method: 'POST' }); } catch {}
+        try { await api.logout(); } catch {}
         showLogin();
     });
 
@@ -119,13 +111,17 @@
     /* ------------------------------------------------------- */
     function switchTab(name) {
         tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === name));
-        tabContents.forEach(c => {
-            const isActive = c.id === 'tab' + name.charAt(0).toUpperCase() + name.slice(1);
-            c.classList.toggle('active', isActive);
-            if (c.id !== 'tabProducts' && c.id !== 'productFormSection') c.hidden = !isActive;
-        });
-        productFormSection.hidden = name !== 'form';
-        if (name === 'products') { productFormSection.hidden = true; $('#tabProducts').hidden = false; $('#tabProducts').classList.add('active'); }
+        tabContents.forEach(c => c.hidden = true);
+        productFormSection.hidden = true;
+
+        const targetId = 'tab' + name.charAt(0).toUpperCase() + name.slice(1);
+        const target = $(`#${targetId}`);
+        if (target) { target.hidden = false; target.classList.add('active'); }
+
+        if (name === 'products') {
+            productFormSection.hidden = true;
+            $('#tabProducts').hidden = false;
+        }
         if (name === 'stats') loadStats();
         if (name === 'logs') loadLogs();
     }
@@ -138,13 +134,17 @@
     /*  Products                                                */
     /* ------------------------------------------------------- */
     let allProducts = [];
+    let ghMeta = null;
 
     async function loadProducts() {
         try {
-            const data = await api('/api/adminpanel/products');
+            const data = await api.getProducts();
             allProducts = data.products || [];
+            ghMeta = data._gh;
             renderProducts();
-        } catch {}
+        } catch (err) {
+            toast(err.message, 'error');
+        }
     }
 
     function renderProducts() {
@@ -165,9 +165,11 @@
 
             card.innerHTML = `
                 ${p.image
-                    ? `<img class="ap-product-img" src="${escHtml(p.image)}" alt="" loading="lazy">`
-                    : `<div class="ap-product-img-placeholder"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>`
-                }
+                    ? `<img class="ap-product-img" src="/${escHtml(p.image)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+                    : ''}
+                <div class="ap-product-img-placeholder" ${p.image ? 'style="display:none"' : ''}>
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                </div>
                 <div class="ap-product-info">
                     <div class="ap-product-name">${escHtml(p.name)}</div>
                     <div class="ap-product-meta">
@@ -190,17 +192,16 @@
             btn.addEventListener('click', async (e) => {
                 e.stopPropagation();
                 const id = btn.dataset.delete;
-                if (!confirm('Excluir este produto?')) return;
+                const p = allProducts.find(x => x.id === id);
+                if (!confirm(`Excluir "${p ? p.name : 'produto'}"?`)) return;
                 try {
-                    await api(`/api/adminpanel/products/${id}`, { method: 'DELETE' });
+                    await api.deleteProduct(id);
                     toast('Produto excluído');
                     loadProducts();
                 } catch (err) { toast(err.message, 'error'); }
             });
         });
     }
-
-    function escHtml(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
 
     /* ------------------------------------------------------- */
     /*  Create / Edit                                           */
@@ -228,18 +229,15 @@
         $('#pf_imageUrl').value = product ? (product.image || '') : '';
         currentImageUrl = product ? (product.image || '') : '';
 
-        // image preview
         const preview = $('#pf_imagePreview');
         const placeholder = $('#pf_imagePlaceholder');
-        if (currentImageUrl) { preview.src = currentImageUrl; preview.hidden = false; placeholder.hidden = true; }
+        if (currentImageUrl) { preview.src = '/' + currentImageUrl; preview.hidden = false; placeholder.hidden = true; }
         else { preview.hidden = true; placeholder.hidden = false; }
 
-        // show form tab
         tabs.forEach(t => t.classList.remove('active'));
         tabContents.forEach(c => { c.classList.remove('active'); c.hidden = true; });
         productFormSection.hidden = false;
         productFormSection.classList.add('active');
-        productFormSection.id = 'productFormSection';
     }
 
     function editProduct(id) {
@@ -264,10 +262,10 @@
 
         try {
             if (editingId) {
-                await api(`/api/adminpanel/products/${editingId}`, { method: 'PUT', body: JSON.stringify(body) });
+                await api.updateProduct(editingId, body);
                 toast('Produto atualizado');
             } else {
-                await api('/api/adminpanel/products', { method: 'POST', body: JSON.stringify(body) });
+                await api.createProduct(body);
                 toast('Produto criado');
             }
             switchTab('products');
@@ -298,9 +296,9 @@
         if (!file.type.startsWith('image/')) { toast('Selecione uma imagem', 'error'); return; }
         uploadArea.style.opacity = '0.5';
         try {
-            const url = await apiUpload(file);
+            const url = await api.uploadImage(file);
             currentImageUrl = url;
-            preview.src = url;
+            preview.src = '/' + url;
             preview.hidden = false;
             placeholder.hidden = true;
             $('#pf_imageUrl').value = '';
@@ -313,7 +311,7 @@
         const url = $('#pf_imageUrl').value.trim();
         if (url) {
             currentImageUrl = url;
-            preview.src = url;
+            preview.src = url.startsWith('/') ? url : '/' + url;
             preview.hidden = false;
             placeholder.hidden = true;
         }
@@ -324,16 +322,16 @@
     /* ------------------------------------------------------- */
     async function loadStats() {
         try {
-            const s = await api('/api/adminpanel/stats');
+            const s = await api.getStats();
             statsGrid.innerHTML = `
                 <div class="ap-stat-card"><div class="ap-stat-value">${s.total}</div><div class="ap-stat-label">Total</div></div>
                 <div class="ap-stat-card"><div class="ap-stat-value">${s.active}</div><div class="ap-stat-label">Ativos</div></div>
                 <div class="ap-stat-card"><div class="ap-stat-value">${s.outOfStock}</div><div class="ap-stat-label">Sem estoque</div></div>
                 <div class="ap-stat-card"><div class="ap-stat-value">${s.onSale}</div><div class="ap-stat-label">Em promoção</div></div>
                 <div class="ap-stat-card"><div class="ap-stat-value">${s.featured}</div><div class="ap-stat-label">Destaques</div></div>
-                <div class="ap-stat-card"><div class="ap-stat-value">${s.totalValue || 0}</div><div class="ap-stat-label">Valor total (R$)</div></div>
+                <div class="ap-stat-card"><div class="ap-stat-value">R$ ${s.totalValue.toFixed(2)}</div><div class="ap-stat-label">Valor total</div></div>
             `;
-        } catch {}
+        } catch (err) { toast(err.message, 'error'); }
     }
 
     /* ------------------------------------------------------- */
@@ -341,25 +339,21 @@
     /* ------------------------------------------------------- */
     async function loadLogs() {
         try {
-            const data = await api('/api/adminpanel/logs');
-            const logs = data.logs || [];
+            const logs = await api.getLogs();
             logsList.innerHTML = '';
             if (!logs.length) { logsEmpty.hidden = false; return; }
             logsEmpty.hidden = true;
 
             logs.forEach(l => {
-                const iconClass = l.action.includes('create') ? 'ap-log-icon-create'
-                    : l.action.includes('update') || l.action.includes('edit') ? 'ap-log-icon-update'
-                    : l.action.includes('delete') ? 'ap-log-icon-delete'
-                    : l.action.includes('deploy') ? 'ap-log-icon-deploy'
-                    : l.action.includes('login') ? 'ap-log-icon-login'
-                    : l.action.includes('logout') ? 'ap-log-icon-logout'
+                const action = (l.action || '').toLowerCase();
+                const iconClass = action.includes('creat') ? 'ap-log-icon-create'
+                    : action.includes('updat') || action.includes('edit') ? 'ap-log-icon-update'
+                    : action.includes('delet') || action.includes('remove') ? 'ap-log-icon-delete'
+                    : action.includes('deploy') || action.includes('push') ? 'ap-log-icon-deploy'
                     : 'ap-log-icon-update';
-                const icon = l.action.includes('create') ? '+'
-                    : l.action.includes('delete') ? '✕'
-                    : l.action.includes('deploy') ? '↑'
-                    : l.action.includes('login') ? '→'
-                    : l.action.includes('logout') ? '←'
+                const icon = action.includes('creat') ? '+'
+                    : action.includes('delet') || action.includes('remove') ? '✕'
+                    : action.includes('deploy') || action.includes('push') ? '↑'
                     : '✎';
                 const time = l.timestamp ? new Date(l.timestamp).toLocaleString('pt-BR') : '';
 
@@ -387,7 +381,7 @@
         deployStatus.className = 'ap-deploy-status loading';
         deployStatus.textContent = 'Publicando...';
         try {
-            const data = await api('/api/adminpanel/deploy', { method: 'POST' });
+            const data = await api.deploy();
             deployStatus.className = 'ap-deploy-status success';
             deployStatus.textContent = data.message || 'Publicado com sucesso!';
             toast('Alterações publicadas!');
@@ -400,7 +394,7 @@
     });
 
     /* ------------------------------------------------------- */
-    /*  PWA: register service worker                            */
+    /*  PWA                                                     */
     /* ------------------------------------------------------- */
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/adminpanel/sw.js').catch(() => {});

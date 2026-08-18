@@ -103,6 +103,7 @@ body {
 .ap-header-left { display: flex; align-items: center; gap: 10px; }
 .ap-header-left img { border-radius: 8px; }
 .ap-header-title { font-weight: 700; font-size: 1rem; }
+.ap-user-info { font-size: 0.75rem; color: var(--text2); background: var(--surface2); padding: 2px 8px; border-radius: 4px; margin-left: 4px; }
 .ap-header-right { display: flex; gap: 4px; }
 
 .ap-icon-btn {
