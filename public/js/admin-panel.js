@@ -165,7 +165,7 @@
 
             card.innerHTML = `
                 ${p.image
-                    ? `<img class="ap-product-img" src="/${escHtml(p.image)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+                    ? `<img class="ap-product-img" src="${escHtml(p.image)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
                     : ''}
                 <div class="ap-product-img-placeholder" ${p.image ? 'style="display:none"' : ''}>
                     <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
@@ -231,7 +231,7 @@
 
         const preview = $('#pf_imagePreview');
         const placeholder = $('#pf_imagePlaceholder');
-        if (currentImageUrl) { preview.src = '/' + currentImageUrl; preview.hidden = false; placeholder.hidden = true; }
+        if (currentImageUrl) { preview.src = currentImageUrl; preview.hidden = false; placeholder.hidden = true; }
         else { preview.hidden = true; placeholder.hidden = false; }
 
         tabs.forEach(t => t.classList.remove('active'));
@@ -298,7 +298,7 @@
         try {
             const url = await api.uploadImage(file);
             currentImageUrl = url;
-            preview.src = '/' + url;
+            preview.src = url;
             preview.hidden = false;
             placeholder.hidden = true;
             $('#pf_imageUrl').value = '';
@@ -311,7 +311,7 @@
         const url = $('#pf_imageUrl').value.trim();
         if (url) {
             currentImageUrl = url;
-            preview.src = url.startsWith('/') ? url : '/' + url;
+            preview.src = url;
             preview.hidden = false;
             placeholder.hidden = true;
         }
@@ -397,7 +397,7 @@
     /*  PWA                                                     */
     /* ------------------------------------------------------- */
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/adminpanel/sw.js').catch(() => {});
+        navigator.serviceWorker.register('adminpanel/sw.js').catch(() => {});
     }
 
     /* ------------------------------------------------------- */
