@@ -2,6 +2,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const { execSync } = require('child_process');
 const compression = require('compression');
 const authRoutes = require('./modules/auth/routes/authRoutes');
 const { verifyUserToken } = require('./modules/auth/services/authService');
@@ -37,7 +38,8 @@ const defaultProducts = [
     onSale: true,
     stock: 12,
     image: '',
-    active: true
+    active: true,
+    featured: false
   },
   {
     id: crypto.randomUUID(),
@@ -49,7 +51,8 @@ const defaultProducts = [
     onSale: false,
     stock: 20,
     image: '',
-    active: true
+    active: true,
+    featured: false
   }
 ];
 
@@ -208,14 +211,6 @@ function requireLocalAdmin(req, res, next) {
   if (!isLocalRequest(req)) {
     return res.status(403).json({ error: 'Admin disponível apenas no PC local.' });
   }
-
-  const cookies = parseCookies(req);
-  const token = cookies.tpoll_admin_token;
-
-  if (!verifyAdminToken(token)) {
-    return res.status(401).json({ error: 'Não autenticado.' });
-  }
-
   return next();
 }
 
@@ -263,7 +258,8 @@ function normalizeProduct(input) {
     onSale: Boolean(input.onSale),
     stock: toStock(input.stock),
     image: normalizedImage || pickImageFromCategory(normalizedName, normalizedCategory),
-    active: Boolean(input.active)
+    active: Boolean(input.active),
+    featured: Boolean(input.featured)
   };
 }
 
@@ -284,13 +280,15 @@ app.use(compression({
 app.use((req, res, next) => {
   const pathname = req.path;
   
-  // Assets estáticos - cache longo (1 ano)
+  // Assets estáticos - cache longo em produção, sem cache em dev
   if (/\.(js|css|png|jpg|jpeg|gif|ico|webp|woff2|ttf|eot|svg)$/i.test(pathname)) {
-    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    const cacheTime = IS_PRODUCTION ? 'public, max-age=31536000, immutable' : 'no-cache, no-store';
+    res.setHeader('Cache-Control', cacheTime);
   }
-  // HTML - cache curto (1 hora)
+  // HTML - sem cache em dev, cache curto em produção
   else if (pathname.endsWith('.html') || pathname === '/') {
-    res.setHeader('Cache-Control', 'public, max-age=3600, must-revalidate');
+    const htmlCache = IS_PRODUCTION ? 'public, max-age=3600, must-revalidate' : 'no-cache, no-store';
+    res.setHeader('Cache-Control', htmlCache);
   }
   // API - sem cache
   else if (pathname.startsWith('/api/')) {
@@ -447,6 +445,20 @@ app.delete('/api/admin/products/:id', requireSameOrigin, requireLocalAdmin, (req
 
   saveProducts(next);
   return res.json({ ok: true });
+});
+
+app.post('/api/admin/deploy', requireSameOrigin, requireLocalAdmin, (req, res) => {
+  try {
+    const siteDir = path.join(__dirname, '..');
+    execSync('git add -A', { cwd: siteDir, timeout: 10000 });
+    execSync('git commit -m "Atualização automática via painel"', { cwd: siteDir, timeout: 10000, stdio: 'pipe' });
+    execSync('git push', { cwd: siteDir, timeout: 30000, stdio: 'pipe' });
+    return res.json({ ok: true, output: 'Publicado!' });
+  } catch (error) {
+    const msg = error.stderr ? error.stderr.toString() : error.message;
+    if (msg.includes('nothing to commit')) return res.json({ ok: true, output: 'Nada para publicar.' });
+    return res.status(500).json({ error: msg });
+  }
 });
 
 app.use(express.static(path.join(__dirname, '..', 'public')));

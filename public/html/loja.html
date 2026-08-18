@@ -52,13 +52,7 @@
             <h2>Painel da Loja</h2>
             <p class="store-admin-note">Cadastre, edite, remova itens e marque promoções.</p>
 
-            <form id="storeLoginForm" class="store-login-form">
-                <input type="password" id="storeAdminPassword" class="store-input" placeholder="Senha do admin">
-                <button type="submit" class="store-btn store-btn-primary">Entrar</button>
-                <button type="button" id="storeAdminLogout" class="store-btn store-btn-secondary" hidden>Sair</button>
-            </form>
-
-            <div id="storeAdminContent" hidden>
+            <div id="storeAdminContent">
                 <form id="storeProductForm" class="store-product-form">
                     <input type="hidden" id="storeProductId">
 
@@ -76,6 +70,7 @@
                     <div class="store-form-flags">
                         <label><input type="checkbox" id="productOnSale"> Em promoção</label>
                         <label><input type="checkbox" id="productActive" checked> Item ativo</label>
+                        <label><input type="checkbox" id="productFeatured"> Destaque do dia</label>
                     </div>
 
                     <div class="store-form-actions">
@@ -85,6 +80,11 @@
                 </form>
 
                 <div id="storeAdminList" class="store-admin-list"></div>
+
+                <div class="store-admin-deploy">
+                    <button type="button" id="deployPushBtn" class="store-btn deploy-btn">Publicar alterações</button>
+                    <span id="deployStatus" class="deploy-status"></span>
+                </div>
             </div>
         </section>
     </main>

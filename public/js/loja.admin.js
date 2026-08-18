@@ -29,11 +29,11 @@
     // ── Visibility ─────────────────────────────────────────────────────────
 
     function setAdminLoggedIn(isLoggedIn) {
-        if (!storeAdminContent || !storeAdminLogout || !storeAdminPassword) return;
+        if (!storeAdminContent) return;
 
         storeAdminContent.hidden = !isLoggedIn;
-        storeAdminPassword.hidden = isLoggedIn;
-        storeAdminLogout.hidden = !isLoggedIn;
+        if (storeAdminPassword) storeAdminPassword.hidden = isLoggedIn;
+        if (storeAdminLogout) storeAdminLogout.hidden = !isLoggedIn;
     }
 
     // ── Product form ───────────────────────────────────────────────────────
@@ -62,6 +62,7 @@
         const imageInput       = document.getElementById('productImage');
         const onSaleInput      = document.getElementById('productOnSale');
         const activeInput      = document.getElementById('productActive');
+        const featuredInput    = document.getElementById('productFeatured');
 
         if (idInput)          idInput.value          = product.id;
         if (nameInput)        nameInput.value        = product.name || '';
@@ -73,6 +74,7 @@
         if (imageInput)       imageInput.value       = product.image || '';
         if (onSaleInput)      onSaleInput.checked    = Boolean(product.onSale);
         if (activeInput)      activeInput.checked    = Boolean(product.active);
+        if (featuredInput)    featuredInput.checked  = Boolean(product.featured);
     }
 
     // ── Admin list render ──────────────────────────────────────────────────
@@ -91,11 +93,23 @@
             const row = document.createElement('div');
             row.className = 'store-admin-item';
 
+            const stock = Math.max(0, parseInt(product.stock || 0, 10));
+
             const info  = document.createElement('div');
             const title = document.createElement('strong');
             title.textContent = String(product.name || 'Sem nome');
             const meta = document.createElement('p');
-            meta.textContent = `${product.category || 'Geral'} • Estoque: ${Math.max(0, parseInt(product.stock || 0, 10))}`;
+
+            let stockClass = 'stock-ok';
+            let stockText = `Estoque: ${stock}`;
+            if (stock === 0) {
+                stockClass = 'stock-empty';
+                stockText = 'Sem estoque';
+            } else if (stock <= 3) {
+                stockClass = 'stock-low';
+                stockText = `Última${stock === 1 ? '' : 's'} ${stock} unidade${stock === 1 ? '' : 's'}!`;
+            }
+            meta.innerHTML = `${product.category || 'Geral'} • <span class="${stockClass}">${stockText}</span>`;
             info.appendChild(title);
             info.appendChild(meta);
 
@@ -114,11 +128,49 @@
 
             actions.appendChild(makeButton('toggle', product.active ? 'Desativar' : 'Ativar'));
             actions.appendChild(makeButton('edit', 'Editar'));
+
+            if (stock === 0) {
+                actions.appendChild(makeButton('restore', 'Restaurar (1)', 'store-mini-btn-success'));
+            } else {
+                actions.appendChild(makeButton('outOfStock', 'Sem estoque', 'store-mini-btn-warning'));
+            }
+
             actions.appendChild(makeButton('delete', 'Excluir', 'store-mini-btn-danger'));
 
             row.appendChild(info);
             row.appendChild(actions);
             storeAdminList.appendChild(row);
+        });
+    }
+
+    // ── Deploy ─────────────────────────────────────────────────────────────
+
+    function handleDeploy() {
+        const deployBtn = document.getElementById('deployPushBtn');
+        const deployStatus = document.getElementById('deployStatus');
+        if (!deployBtn) return;
+
+        deployBtn.addEventListener('click', async () => {
+            deployBtn.disabled = true;
+            if (deployStatus) {
+                deployStatus.textContent = 'Publicando...';
+                deployStatus.className = 'deploy-status';
+            }
+
+            try {
+                const result = await storeApi.apiRequest('/api/admin/deploy', { method: 'POST' });
+                if (deployStatus) {
+                    deployStatus.textContent = result.output || 'Feito!';
+                    deployStatus.className = 'deploy-status deploy-ok';
+                }
+            } catch (error) {
+                if (deployStatus) {
+                    deployStatus.textContent = error.message || 'Erro ao publicar.';
+                    deployStatus.className = 'deploy-status deploy-error';
+                }
+            } finally {
+                deployBtn.disabled = false;
+            }
         });
     }
 
@@ -172,6 +224,7 @@
                 const imageInput       = document.getElementById('productImage');
                 const onSaleInput      = document.getElementById('productOnSale');
                 const activeInput      = document.getElementById('productActive');
+                const featuredInput    = document.getElementById('productFeatured');
 
                 const id = (idInput && idInput.value) || '';
                 const payload = {
@@ -183,7 +236,8 @@
                     stock:       Math.max(0, parseInt((stockInput && stockInput.value) || '0', 10)),
                     image:       (imageInput && imageInput.value ? imageInput.value.trim() : ''),
                     onSale:      Boolean(onSaleInput && onSaleInput.checked),
-                    active:      Boolean(activeInput && activeInput.checked)
+                    active:      Boolean(activeInput && activeInput.checked),
+                    featured:    Boolean(featuredInput && featuredInput.checked)
                 };
 
                 if (!payload.name) {
@@ -246,6 +300,24 @@
                         return;
                     }
 
+                    if (action === 'restore') {
+                        await storeApi.apiRequest(`/api/admin/products/${id}`, {
+                            method: 'PUT',
+                            body: JSON.stringify({ ...product, stock: 1 })
+                        });
+                        await reloadForAdmin();
+                        return;
+                    }
+
+                    if (action === 'outOfStock') {
+                        await storeApi.apiRequest(`/api/admin/products/${id}`, {
+                            method: 'PUT',
+                            body: JSON.stringify({ ...product, stock: 0 })
+                        });
+                        await reloadForAdmin();
+                        return;
+                    }
+
                     if (action === 'delete') {
                         const confirmed = window.confirm(`Remover "${product.name}" da loja?`);
                         if (!confirmed) return;
@@ -262,6 +334,8 @@
                 }
             });
         }
+
+        handleDeploy();
     }
 
     // ── Export ─────────────────────────────────────────────────────────────

@@ -5,7 +5,8 @@
   "description": "TPoll website with secure local-only store admin backend",
   "main": "server/app.js",
   "scripts": {
-    "start": "node server/app.js"
+    "start": "node server/app.js",
+    "dev": "npx nodemon server/app.js"
   },
   "engines": {
     "node": ">=18"

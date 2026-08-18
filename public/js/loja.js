@@ -72,22 +72,29 @@ async function initStore() {
     }
 
     try {
-        const status = await storeApi.apiRequest('/api/admin/status', { method: 'GET' });
-
-        if (isLocalClient() && status.adminEnabled && openStoreAdmin) {
-            openStoreAdmin.hidden = false;
-            openStoreAdmin.addEventListener('click', () => {
-                if (!storeAdminPanel) return;
-                storeAdminPanel.hidden = !storeAdminPanel.hidden;
-            });
-        }
-
-        if (status.loggedIn) {
+        if (isLocalClient()) {
+            if (openStoreAdmin) {
+                openStoreAdmin.hidden = false;
+                openStoreAdmin.addEventListener('click', () => {
+                    if (!storeAdminPanel) return;
+                    storeAdminPanel.hidden = !storeAdminPanel.hidden;
+                    if (!storeAdminPanel.hidden) {
+                        storeAdminPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            }
             if (storeAdmin) storeAdmin.setAdminLoggedIn(true);
             await reloadForAdmin();
         } else {
-            if (storeAdmin) storeAdmin.setAdminLoggedIn(false);
-            await reloadForPublic();
+            const status = await storeApi.apiRequest('/api/admin/status', { method: 'GET' });
+
+            if (status.loggedIn) {
+                if (storeAdmin) storeAdmin.setAdminLoggedIn(true);
+                await reloadForAdmin();
+            } else {
+                if (storeAdmin) storeAdmin.setAdminLoggedIn(false);
+                await reloadForPublic();
+            }
         }
     } catch (error) {
         if (storeAdmin) storeAdmin.setAdminLoggedIn(false);

@@ -54,7 +54,11 @@
 
     function createProductCard(product) {
         const card = document.createElement('article');
-        card.className = 'store-card';
+        const stock = Math.max(0, parseInt(product.stock || 0, 10));
+        const outOfStock = stock === 0;
+        const lowStock = stock > 0 && stock <= 3;
+
+        card.className = outOfStock ? 'store-card store-card--out-of-stock' : 'store-card';
 
         const safeName        = escapeHtml(product.name || '');
         const safeCategory    = escapeHtml(product.category || 'Geral');
@@ -70,6 +74,13 @@
             ? `<p class="store-card-price"><span class="store-price-old">${formatMoneyBRL(parseMoney(product.price))}</span><span class="store-price-new">${formatMoneyBRL(parseMoney(product.promoPrice))}</span></p>`
             : `<p class="store-card-price">${formatMoneyBRL(parseMoney(product.price))}</p>`;
 
+        let stockMarkup = `<p class="store-card-stock">Estoque: ${stock}</p>`;
+        if (outOfStock) {
+            stockMarkup = '<p class="store-card-stock stock-empty">Esgotado</p>';
+        } else if (lowStock) {
+            stockMarkup = `<p class="store-card-stock stock-low">Última${stock === 1 ? '' : 's'} ${stock} unidade${stock === 1 ? '' : 's'}!</p>`;
+        }
+
         card.innerHTML = `
             ${imageMarkup}
             <div class="store-card-content">
@@ -77,28 +88,41 @@
                 <h3>${safeName}</h3>
                 <p class="store-card-description">${safeDescription}</p>
                 ${priceMarkup}
-                <p class="store-card-stock">Estoque: ${Math.max(0, parseInt(product.stock || 0, 10))}</p>
+                ${stockMarkup}
                 <div class="store-card-actions">
-                    <button type="button" class="store-buy-btn">WhatsApp</button>
-                    <button type="button" class="store-pix-btn">Pagar no PIX</button>
+                    <button type="button" class="store-buy-btn"${outOfStock ? ' disabled' : ''}>WhatsApp</button>
+                    <button type="button" class="store-pix-btn"${outOfStock ? ' disabled' : ''}>Pagar no PIX</button>
                 </div>
             </div>
         `;
 
-        if (hasPromo) {
+        if (outOfStock) {
+            const badge = document.createElement('span');
+            badge.className = 'store-sale-badge store-badge-out-of-stock';
+            badge.textContent = 'Esgotado';
+            card.appendChild(badge);
+        } else if (hasPromo) {
             const badge = document.createElement('span');
             badge.className = 'store-sale-badge';
             badge.textContent = 'Promoção';
             card.appendChild(badge);
         }
 
+        if (product.featured && !outOfStock) {
+            const featBadge = document.createElement('span');
+            featBadge.className = 'store-sale-badge store-badge-featured';
+            featBadge.textContent = 'Destaque';
+            featBadge.style.top = outOfStock ? '40px' : '10px';
+            card.appendChild(featBadge);
+        }
+
         const buyButton = card.querySelector('.store-buy-btn');
-        if (buyButton) {
+        if (buyButton && !outOfStock) {
             buyButton.addEventListener('click', () => openProductOnWhatsApp(product));
         }
 
         const pixButton = card.querySelector('.store-pix-btn');
-        if (pixButton) {
+        if (pixButton && !outOfStock) {
             pixButton.addEventListener('click', () => openProductOnPix(product));
         }
 
@@ -151,11 +175,48 @@
 
     // ── Store render ───────────────────────────────────────────────────────
 
+    function renderFeaturedSection() {
+        const existing = document.getElementById('storeFeaturedSection');
+        if (existing) existing.remove();
+
+        const featured = _getProducts().filter(
+            (p) => p.active && p.featured && Math.max(0, parseInt(p.stock || 0, 10)) > 0
+        );
+
+        if (featured.length === 0) return;
+
+        const section = document.createElement('section');
+        section.id = 'storeFeaturedSection';
+        section.className = 'store-featured-section';
+
+        section.innerHTML = `
+            <div class="store-featured-header">
+                <span class="store-featured-eyebrow">Promoções do Dia</span>
+                <h2 class="store-featured-title">Destaques especiais</h2>
+                <p class="store-featured-subtitle">Produtos selecionados com ofertas imperdíveis</p>
+            </div>
+            <div class="store-featured-grid"></div>
+        `;
+
+        const grid = section.querySelector('.store-featured-grid');
+        featured.forEach((product) => {
+            const card = createProductCard(product);
+            card.classList.add('store-card--featured');
+            grid.appendChild(card);
+        });
+
+        if (storeProductsContainer && storeProductsContainer.parentNode) {
+            storeProductsContainer.parentNode.insertBefore(section, storeProductsContainer);
+        }
+    }
+
     function renderStore() {
         if (!storeProductsContainer || !storeEmpty) return;
 
         const filteredProducts = getFilteredProducts();
         storeProductsContainer.innerHTML = '';
+
+        renderFeaturedSection();
 
         if (filteredProducts.length === 0) {
             storeEmpty.hidden = false;

@@ -476,6 +476,53 @@ body {
     }
 }
 
+@media (max-width: 768px) {
+    .store-featured-grid { grid-template-columns: 1fr; gap: 14px; }
+    .store-featured-section { padding: 16px; }
+    .store-featured-title { font-size: 1.3rem; }
+}
+
+/* ── Estoque ──────────────────────────────────────────────────────────────── */
+
+.stock-empty { color: #dc2626; font-weight: 600; }
+.stock-low { color: #ea580c; font-weight: 600; }
+.stock-ok { color: #6b7280; }
+.store-card--out-of-stock { opacity: 0.55; pointer-events: none; }
+.store-card--out-of-stock .store-buy-btn,
+.store-card--out-of-stock .store-pix-btn { background: #9ca3af; cursor: not-allowed; }
+.store-badge-out-of-stock { background: #6b7280 !important; }
+.store-badge-featured { background: #f59e0b !important; color: #1f2937 !important; }
+
+/* ── Seção Promoções do Dia ──────────────────────────────────────────────── */
+
+.store-featured-section { margin-bottom: 28px; padding: 24px; border-radius: 16px; background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 50%, #fef9c3 100%); border: 2px solid #fbbf24; }
+.store-featured-header { text-align: center; margin-bottom: 20px; }
+.store-featured-eyebrow { display: inline-block; padding: 4px 12px; border-radius: 999px; background: #f59e0b; color: #1f2937; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; }
+.store-featured-title { margin: 0 0 4px; font-size: 1.6rem; color: #92400e; }
+.store-featured-subtitle { margin: 0; color: #a16207; font-size: 0.92rem; }
+.store-featured-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.store-card--featured { border: 2px solid #f59e0b; }
+
+/* ── Botões toggle admin ─────────────────────────────────────────────────── */
+
+.store-mini-btn-warning { border-color: #fbbf24; color: #92400e; background: #fffbeb; }
+.store-mini-btn-success { border-color: #86efac; color: #166534; background: #f0fdf4; }
+
+/* ── Badges admin ────────────────────────────────────────────────────────── */
+
+.store-admin-badges { display: flex; gap: 6px; margin-top: 6px; }
+.store-admin-badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 0.72rem; font-weight: 700; }
+.store-admin-badge-featured { background: #fef3c7; color: #92400e; border: 1px solid #fbbf24; }
+.store-admin-badge-sale { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+.store-admin-badge-inactive { background: #e5e7eb; color: #6b7280; }
+
+/* ── Deploy ───────────────────────────────────────────────────────────────── */
+
+.store-admin-deploy { display: flex; align-items: center; gap: 12px; margin-top: 16px; padding-top: 16px; border-top: 1px solid #e5e7eb; }
+.deploy-btn { background: #0d9488 !important; color: white !important; border: none !important; padding: 10px 18px !important; font-weight: 600; }
+.deploy-ok { color: #16a34a; }
+.deploy-error { color: #dc2626; }
+
 /* ── PIX Modal ─────────────────────────────────────────────────────────────── */
 
 .pix-modal-overlay {
