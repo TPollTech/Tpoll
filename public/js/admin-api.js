@@ -10,6 +10,7 @@
     const DATA_PATH = 'server/store-data.json';
     const ASSETS_DIR = 'public/assets/fotos-produtos/aplicadas';
     const BRANCH = 'main';
+    const ADMIN_PIN = '240726';
 
     const GITHUB_API = 'https://api.github.com';
 
@@ -103,16 +104,21 @@
                 return { ok: true, mode: 'local' };
             }
 
-            // GitHub mode: PIN is ignored, use stored token
-            const token = getToken();
-            if (!token) throw new Error('Configure o token GitHub nas configurações.');
-            // Validate token
+            // GitHub mode: accept PIN or GitHub token
+            if (pin === ADMIN_PIN) {
+                localStorage.setItem('tpoll_admin_session', 'active');
+                return { ok: true, mode: 'github' };
+            }
+
+            // Try as GitHub token
+            setToken(pin);
             try {
                 await ghFetch('/user');
+                localStorage.setItem('tpoll_admin_session', 'active');
                 return { ok: true, mode: 'github' };
             } catch {
                 clearToken();
-                throw new Error('Token GitHub inválido. Configure novamente.');
+                throw new Error('PIN ou token inválido.');
             }
         },
 
@@ -131,6 +137,7 @@
             if (isLocal) {
                 try { await fetch('/api/adminpanel/logout', { method: 'POST' }); } catch {}
             }
+            localStorage.removeItem('tpoll_admin_session');
             clearToken();
         },
 
@@ -139,15 +146,13 @@
                 const res = await fetch('/api/adminpanel/status');
                 return res.json();
             }
-            const token = getToken();
-            if (!token) return { loggedIn: false };
-            try {
-                const res = await ghFetch('/user');
-                const user = await res.json();
-                return { loggedIn: true, user: user.login };
-            } catch {
-                return { loggedIn: false };
+            // GitHub mode: check localStorage session
+            const session = localStorage.getItem('tpoll_admin_session');
+            if (session === 'active') {
+                const user = await adminApi.getUser();
+                return { loggedIn: true, user: user ? user.login : 'Admin' };
             }
+            return { loggedIn: false };
         },
 
         /* --- Products -------------------------------------- */
