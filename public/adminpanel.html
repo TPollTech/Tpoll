@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0d1117">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="icon" type="image/png" href="/TPoll%20Logo.png">
+    <link rel="manifest" href="/adminpanel/manifest.json">
+    <title>TPoll Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/admin-panel.css?v=2">
+</head>
+<body>
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-card">
+            <div class="login-logo">
+                <img src="/TPoll%20Logo.png" alt="TPoll" width="48" height="48">
+            </div>
+            <h1 class="login-title">TPoll Admin</h1>
+            <p class="login-subtitle">Insira o PIN para acessar o painel</p>
+            <form id="loginForm" class="login-form" autocomplete="off">
+                <input type="password" id="pinInput" class="login-input" placeholder="PIN" maxlength="20" inputmode="numeric" autofocus>
+                <div id="loginError" class="login-error" hidden> PIN inválido. Tente novamente.</div>
+                <button type="submit" class="login-btn">Entrar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ADMIN PANEL -->
+    <div id="adminPanel" class="admin-panel" hidden>
+        <header class="ap-header">
+            <div class="ap-header-left">
+                <img src="/TPoll%20Logo.png" alt="" width="28" height="28">
+                <span class="ap-header-title">Admin</span>
+            </div>
+            <div class="ap-header-right">
+                <button type="button" id="btnStats" class="ap-icon-btn" title="Estatísticas">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+                </button>
+                <button type="button" id="btnLogs" class="ap-icon-btn" title="Atividade">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                </button>
+                <button type="button" id="btnLogout" class="ap-icon-btn ap-icon-btn-danger" title="Sair">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- TABS -->
+        <nav class="ap-tabs">
+            <button type="button" class="ap-tab active" data-tab="products">Produtos</button>
+            <button type="button" class="ap-tab" data-tab="stats">Stats</button>
+            <button type="button" class="ap-tab" data-tab="logs">Atividade</button>
+            <button type="button" class="ap-tab" data-tab="deploy">Publicar</button>
+        </nav>
+
+        <!-- PRODUCTS TAB -->
+        <section id="tabProducts" class="ap-tab-content active">
+            <div class="ap-section-header">
+                <h2>Produtos</h2>
+                <button type="button" id="btnNewProduct" class="ap-btn ap-btn-primary ap-btn-sm">+ Novo</button>
+            </div>
+
+            <div id="productsList" class="ap-products-list"></div>
+            <div id="productsEmpty" class="ap-empty" hidden>Nenhum produto encontrado.</div>
+        </section>
+
+        <!-- PRODUCT FORM (hidden by default) -->
+        <section id="productFormSection" class="ap-tab-content" hidden>
+            <div class="ap-section-header">
+                <h2 id="formTitle">Novo Produto</h2>
+                <button type="button" id="btnBackToList" class="ap-btn ap-btn-ghost ap-btn-sm">← Voltar</button>
+            </div>
+            <form id="productForm" class="ap-form" enctype="multipart/form-data">
+                <input type="hidden" id="pf_id">
+
+                <div class="ap-form-group">
+                    <label for="pf_name">Nome *</label>
+                    <input type="text" id="pf_name" class="ap-input" required placeholder="Nome do produto">
+                </div>
+
+                <div class="ap-form-row">
+                    <div class="ap-form-group">
+                        <label for="pf_category">Categoria</label>
+                        <input type="text" id="pf_category" class="ap-input" placeholder="Capinhas, Fones...">
+                    </div>
+                    <div class="ap-form-group">
+                        <label for="pf_stock">Estoque</label>
+                        <input type="number" id="pf_stock" class="ap-input" min="0" step="1" value="1">
+                    </div>
+                </div>
+
+                <div class="ap-form-row">
+                    <div class="ap-form-group">
+                        <label for="pf_price">Preço (R$) *</label>
+                        <input type="number" id="pf_price" class="ap-input" min="0" step="0.01" required placeholder="0.00">
+                    </div>
+                    <div class="ap-form-group">
+                        <label for="pf_promoPrice">Preço promo (R$)</label>
+                        <input type="number" id="pf_promoPrice" class="ap-input" min="0" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+
+                <div class="ap-form-group">
+                    <label>Imagem</label>
+                    <div class="ap-upload-area" id="uploadArea">
+                        <input type="file" id="pf_imageFile" accept="image/*" capture="environment" hidden>
+                        <img id="pf_imagePreview" class="ap-upload-preview" hidden>
+                        <div id="pf_imagePlaceholder" class="ap-upload-placeholder">
+                            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                            <span>Toque para enviar foto</span>
+                            <small>JPG, PNG, WebP (máx. 10MB)</small>
+                        </div>
+                    </div>
+                    <input type="url" id="pf_imageUrl" class="ap-input ap-input-sm" placeholder="Ou cole a URL da imagem" style="margin-top:8px">
+                </div>
+
+                <div class="ap-form-group">
+                    <label for="pf_description">Descrição</label>
+                    <textarea id="pf_description" class="ap-input" rows="3" placeholder="Descrição do produto"></textarea>
+                </div>
+
+                <div class="ap-form-flags">
+                    <label class="ap-toggle">
+                        <input type="checkbox" id="pf_onSale">
+                        <span class="ap-toggle-slider"></span>
+                        <span>Em promoção</span>
+                    </label>
+                    <label class="ap-toggle">
+                        <input type="checkbox" id="pf_featured">
+                        <span class="ap-toggle-slider"></span>
+                        <span>Destaque do dia</span>
+                    </label>
+                    <label class="ap-toggle">
+                        <input type="checkbox" id="pf_active" checked>
+                        <span class="ap-toggle-slider"></span>
+                        <span>Ativo</span>
+                    </label>
+                </div>
+
+                <div class="ap-form-actions">
+                    <button type="submit" class="ap-btn ap-btn-primary">Salvar</button>
+                    <button type="button" id="btnCancelForm" class="ap-btn ap-btn-ghost">Cancelar</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- STATS TAB -->
+        <section id="tabStats" class="ap-tab-content" hidden>
+            <div class="ap-section-header"><h2>Estatísticas</h2></div>
+            <div id="statsGrid" class="ap-stats-grid"></div>
+        </section>
+
+        <!-- LOGS TAB -->
+        <section id="tabLogs" class="ap-tab-content" hidden>
+            <div class="ap-section-header"><h2>Atividade Recente</h2></div>
+            <div id="logsList" class="ap-logs-list"></div>
+            <div id="logsEmpty" class="ap-empty" hidden>Nenhuma atividade registrada.</div>
+        </section>
+
+        <!-- DEPLOY TAB -->
+        <section id="tabDeploy" class="ap-tab-content" hidden>
+            <div class="ap-section-header"><h2>Publicar Alterações</h2></div>
+            <div class="ap-deploy-card">
+                <p>Envia todas as alterações do <code>store-data.json</code> para o repositório. O site será atualizado automaticamente no GitHub Pages.</p>
+                <button type="button" id="btnDeploy" class="ap-btn ap-btn-primary ap-btn-lg">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                    Publicar agora
+                </button>
+                <div id="deployStatus" class="ap-deploy-status"></div>
+            </div>
+        </section>
+    </div>
+
+    <script src="/js/admin-panel.js"></script>
+</body>
+</html>

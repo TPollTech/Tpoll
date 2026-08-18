@@ -2,4 +2,8 @@ node_modules/
 server/store-data.json
 # Auth data files — contain sensitive user data
 server/modules/auth/data/
+server/admin-auth.json
+server/admin-sessions.json
+server/admin-logs.json
+public/uploads/
 .env

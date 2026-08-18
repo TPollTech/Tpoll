@@ -4,6 +4,9 @@ const path = require('path');
 const crypto = require('crypto');
 const { execSync } = require('child_process');
 const compression = require('compression');
+const bcrypt = require('bcryptjs');
+const multer = require('multer');
+const sharp = require('sharp');
 const authRoutes = require('./modules/auth/routes/authRoutes');
 const { verifyUserToken } = require('./modules/auth/services/authService');
 const activityService = require('./modules/auth/services/activityService');
@@ -13,13 +16,16 @@ const app = express();
 const PORT = Number(process.env.PORT || 5500);
 const DATA_FILE = path.join(__dirname, 'store-data.json');
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
-const ADMIN_PASSWORD = process.env.TPOLL_ADMIN_PASSWORD || (IS_PRODUCTION ? '' : 'tpoll2026');
 const TOKEN_SECRET = process.env.TPOLL_TOKEN_SECRET || (IS_PRODUCTION ? '' : 'troque-este-segredo-em-producao');
 const TOKEN_TTL_SECONDS = 60 * 60 * 8;
 
-if (IS_PRODUCTION && (!ADMIN_PASSWORD || ADMIN_PASSWORD.length < 8)) {
-  throw new Error('Defina TPOLL_ADMIN_PASSWORD com pelo menos 8 caracteres.');
-}
+const ADMIN_AUTH_FILE = path.join(__dirname, 'admin-auth.json');
+const ADMIN_SESSIONS_FILE = path.join(__dirname, 'admin-sessions.json');
+const ADMIN_LOGS_FILE = path.join(__dirname, 'admin-logs.json');
+const UPLOADS_DIR = path.join(__dirname, '..', 'public', 'uploads', 'products');
+const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
+const DEFAULT_ADMIN_PIN = process.env.TPOLL_ADMIN_PIN || '240726';
+const BCRYPT_ROUNDS = 12;
 
 if (IS_PRODUCTION && (!TOKEN_SECRET || TOKEN_SECRET.length < 32)) {
   throw new Error('Defina TPOLL_TOKEN_SECRET com pelo menos 32 caracteres.');
@@ -31,8 +37,8 @@ const defaultProducts = [
   {
     id: crypto.randomUUID(),
     name: 'Cabo USB-C Turbo',
-    category: 'Acessórios',
-    description: 'Cabo reforçado com carregamento rápido.',
+    category: 'Acess\u00f3rios',
+    description: 'Cabo refor\u00e7ado com carregamento r\u00e1pido.',
     price: 39.9,
     promoPrice: 29.9,
     onSale: true,
@@ -43,9 +49,9 @@ const defaultProducts = [
   },
   {
     id: crypto.randomUUID(),
-    name: 'Película 3D Premium',
-    category: 'Proteção',
-    description: 'Película resistente para celulares.',
+    name: 'Pel\u00edcula 3D Premium',
+    category: 'Prote\u00e7\u00e3o',
+    description: 'Pel\u00edcula resistente para celulares.',
     price: 45,
     promoPrice: 0,
     onSale: false,
@@ -105,7 +111,8 @@ function normalizeImageUrl(value) {
   const hasUnsafeChars = /["'<>\\]/.test(image);
   if (hasUnsafeChars) return '';
 
-  const isAllowedRelative = image.startsWith('assets/') || image.startsWith('/assets/') || image.startsWith('./assets/');
+  const isAllowedRelative = image.startsWith('assets/') || image.startsWith('/assets/') || image.startsWith('./assets/') ||
+    image.startsWith('uploads/') || image.startsWith('/uploads/') || image.startsWith('./uploads/');
   const isAllowedAbsolute = image.startsWith('https://') || image.startsWith('http://');
 
   return isAllowedRelative || isAllowedAbsolute ? image : '';
@@ -202,14 +209,119 @@ function isSameOriginRequest(req) {
 
 function requireSameOrigin(req, res, next) {
   if (!isSameOriginRequest(req)) {
-    return res.status(403).json({ error: 'Origem inválida.' });
+    return res.status(403).json({ error: 'Origem inv\u00e1lida.' });
   }
   return next();
 }
 
 function requireLocalAdmin(req, res, next) {
   if (!isLocalRequest(req)) {
-    return res.status(403).json({ error: 'Admin disponível apenas no PC local.' });
+    return res.status(403).json({ error: 'Admin dispon\u00edvel apenas no PC local.' });
+  }
+  return next();
+}
+
+// -- Admin Panel Helpers ---------------------------------------------------
+
+function readJsonSafe(filePath, fallback) {
+  try {
+    if (!fs.existsSync(filePath)) return fallback;
+    const raw = fs.readFileSync(filePath, 'utf-8').replace(/^\uFEFF/, '');
+    return JSON.parse(raw);
+  } catch {
+    return fallback;
+  }
+}
+
+function writeJsonSafe(filePath, data) {
+  try {
+    const dir = path.dirname(filePath);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
+  } catch {
+    // no-op
+  }
+}
+
+function ensureAdminAuth() {
+  if (fs.existsSync(ADMIN_AUTH_FILE)) return;
+  const hash = bcrypt.hashSync(DEFAULT_ADMIN_PIN, BCRYPT_ROUNDS);
+  writeJsonSafe(ADMIN_AUTH_FILE, { pinHash: hash });
+}
+
+function getAdminPinHash() {
+  const data = readJsonSafe(ADMIN_AUTH_FILE, null);
+  return data && data.pinHash ? data.pinHash : null;
+}
+
+function verifyAdminPin(pin) {
+  const hash = getAdminPinHash();
+  if (!hash) return false;
+  return bcrypt.compareSync(String(pin || ''), hash);
+}
+
+function createAdminSession() {
+  const id = crypto.randomUUID();
+  const sessions = readJsonSafe(ADMIN_SESSIONS_FILE, []);
+  sessions.push({ id, createdAt: Date.now() });
+  writeJsonSafe(ADMIN_SESSIONS_FILE, sessions);
+  return id;
+}
+
+function verifyAdminSession(sessionId) {
+  if (!sessionId) return false;
+  const sessions = readJsonSafe(ADMIN_SESSIONS_FILE, []);
+  const now = Date.now();
+  const ttlMs = SESSION_TTL_SECONDS * 1000;
+  const valid = sessions.filter((s) => (now - s.createdAt) < ttlMs);
+  if (valid.length !== sessions.length) {
+    writeJsonSafe(ADMIN_SESSIONS_FILE, valid);
+  }
+  return valid.some((s) => s.id === sessionId);
+}
+
+function destroyAdminSession(sessionId) {
+  const sessions = readJsonSafe(ADMIN_SESSIONS_FILE, []);
+  const filtered = sessions.filter((s) => s.id !== sessionId);
+  writeJsonSafe(ADMIN_SESSIONS_FILE, filtered);
+}
+
+function logAdminAction(action, details) {
+  const logs = readJsonSafe(ADMIN_LOGS_FILE, []);
+  logs.unshift({ action, details, timestamp: Date.now() });
+  if (logs.length > 500) logs.length = 500;
+  writeJsonSafe(ADMIN_LOGS_FILE, logs);
+}
+
+// -- Upload middleware & processor -----------------------------------------
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif'];
+    if (allowed.includes(file.mimetype)) cb(null, true);
+    else cb(new Error('Tipo de arquivo n\u00e3o permitido.'));
+  }
+});
+
+async function processUpload(file) {
+  const filename = `${Date.now()}-${crypto.randomBytes(4).toString('hex')}.webp`;
+  if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+  await sharp(file.buffer)
+    .resize(800, 800, { fit: 'inside', withoutEnlargement: true })
+    .webp({ quality: 82 })
+    .toFile(path.join(UPLOADS_DIR, filename));
+  return '/uploads/products/' + filename;
+}
+
+// -- Admin Panel Session Middleware ----------------------------------------
+
+function requireAdminSession(req, res, next) {
+  const cookies = parseCookies(req);
+  const sessionId = cookies.tpoll_admin_session;
+  if (!verifyAdminSession(sessionId)) {
+    return res.status(401).json({ error: 'Sess\u00e3o inv\u00e1lida ou expirada.' });
   }
   return next();
 }
@@ -232,10 +344,10 @@ function normalizeProduct(input) {
     if (categoryText.includes('mouse')) return 'assets/product-images/mouse.svg';
     if (categoryText.includes('switch') || categoryText.includes('rede')) return 'assets/product-images/network-switch.svg';
     if (categoryText.includes('hub') || categoryText.includes('usb')) return 'assets/product-images/usb-hub.svg';
-    if (categoryText.includes('displayport') || categoryText.includes('hdmi') || categoryText.includes('vga') || categoryText.includes('dvi') || categoryText.includes('vídeo')) {
+    if (categoryText.includes('displayport') || categoryText.includes('hdmi') || categoryText.includes('vga') || categoryText.includes('dvi') || categoryText.includes('v\u00eddeo')) {
       return 'assets/product-images/video-adapter.svg';
     }
-    if (categoryText.includes('som') || categoryText.includes('áudio') || categoryText.includes('audio')) return 'assets/product-images/audio-usb.svg';
+    if (categoryText.includes('som') || categoryText.includes('\u00e1udio') || categoryText.includes('audio')) return 'assets/product-images/audio-usb.svg';
     if (categoryText.includes('case') || categoryText.includes('armazenamento') || categoryText.includes('hd')) return 'assets/product-images/storage-case.svg';
     if (categoryText.includes('fonte') || categoryText.includes('energia') || categoryText.includes('powerbank')) return 'assets/product-images/power.svg';
     if (categoryText.includes('carregador') || categoryText.includes('veicular') || categoryText.includes('automotivo')) return 'assets/product-images/car-charger.svg';
@@ -265,9 +377,8 @@ function normalizeProduct(input) {
 
 app.disable('x-powered-by');
 
-// ─── Otimizações de Performance ────────────────────────────────────────────
+// --- Otimiza\u00e7\u00f5es de Performance -----------------------------------------------
 
-// Compressão Gzip
 app.use(compression({
   filter: (req, res) => {
     if (req.headers['x-no-compression']) return false;
@@ -276,29 +387,25 @@ app.use(compression({
   level: 6
 }));
 
-// Cache Headers Inteligente
 app.use((req, res, next) => {
   const pathname = req.path;
-  
-  // Assets estáticos - cache longo em produção, sem cache em dev
+
   if (/\.(js|css|png|jpg|jpeg|gif|ico|webp|woff2|ttf|eot|svg)$/i.test(pathname)) {
     const cacheTime = IS_PRODUCTION ? 'public, max-age=31536000, immutable' : 'no-cache, no-store';
     res.setHeader('Cache-Control', cacheTime);
   }
-  // HTML - sem cache em dev, cache curto em produção
   else if (pathname.endsWith('.html') || pathname === '/') {
     const htmlCache = IS_PRODUCTION ? 'public, max-age=3600, must-revalidate' : 'no-cache, no-store';
     res.setHeader('Cache-Control', htmlCache);
   }
-  // API - sem cache
   else if (pathname.startsWith('/api/')) {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
   }
-  
+
   next();
 });
 
-// ─── Security Headers ─────────────────────────────────────────────────────
+// --- Security Headers -------------------------------------------------------
 
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -327,9 +434,8 @@ app.get('/api/health', (req, res) => {
   res.json({ ok: true });
 });
 
-// ── Auth module ───────────────────────────────────────────────────────────
+// -- Auth module ------------------------------------------------------------
 
-// Rate-limit auth endpoints to prevent brute-force attacks
 app.use('/auth', (req, res, next) => {
   const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown')
     .replace('::ffff:', '').split(',')[0].trim();
@@ -346,10 +452,14 @@ app.use('/auth', (req, res, next) => {
 
 app.use('/auth', authRoutes);
 
+// -- Store (public) ---------------------------------------------------------
+
 app.get('/api/store/products', (req, res) => {
   const products = readProducts().filter((product) => product.active);
   res.json(products);
 });
+
+// -- Legacy Admin (local only, backward compat with loja.html) --------------
 
 app.get('/api/admin/status', (req, res) => {
   if (!isLocalRequest(req)) {
@@ -363,7 +473,7 @@ app.get('/api/admin/status', (req, res) => {
 
 app.post('/api/admin/login', requireSameOrigin, (req, res) => {
   if (!isLocalRequest(req)) {
-    return res.status(403).json({ error: 'Admin disponível apenas no PC local.' });
+    return res.status(403).json({ error: 'Admin dispon\u00edvel apenas no PC local.' });
   }
 
   const requester = (req.socket.remoteAddress || 'unknown').replace('::ffff:', '');
@@ -373,10 +483,10 @@ app.post('/api/admin/login', requireSameOrigin, (req, res) => {
 
   const password = String(req.body?.password || '');
   const supplied = Buffer.from(password, 'utf-8');
-  const expected = Buffer.from(ADMIN_PASSWORD, 'utf-8');
+  const expected = Buffer.from(DEFAULT_ADMIN_PIN, 'utf-8');
 
   if (supplied.length !== expected.length || !crypto.timingSafeEqual(supplied, expected)) {
-    return res.status(401).json({ error: 'Senha inválida.' });
+    return res.status(401).json({ error: 'Senha inv\u00e1lida.' });
   }
 
   const token = createAdminToken();
@@ -402,7 +512,7 @@ app.post('/api/admin/products', requireSameOrigin, requireLocalAdmin, (req, res)
   }
 
   if (product.price <= 0) {
-    return res.status(400).json({ error: 'Informe um preço válido.' });
+    return res.status(400).json({ error: 'Informe um pre\u00e7o v\u00e1lido.' });
   }
 
   const products = readProducts();
@@ -417,7 +527,7 @@ app.put('/api/admin/products/:id', requireSameOrigin, requireLocalAdmin, (req, r
   const index = products.findIndex((item) => item.id === id);
 
   if (index < 0) {
-    return res.status(404).json({ error: 'Produto não encontrado.' });
+    return res.status(404).json({ error: 'Produto n\u00e3o encontrado.' });
   }
 
   const updated = normalizeProduct({ ...req.body, id });
@@ -426,7 +536,7 @@ app.put('/api/admin/products/:id', requireSameOrigin, requireLocalAdmin, (req, r
   }
 
   if (updated.price <= 0) {
-    return res.status(400).json({ error: 'Informe um preço válido.' });
+    return res.status(400).json({ error: 'Informe um pre\u00e7o v\u00e1lido.' });
   }
 
   products[index] = updated;
@@ -437,13 +547,13 @@ app.put('/api/admin/products/:id', requireSameOrigin, requireLocalAdmin, (req, r
 app.delete('/api/admin/products/:id', requireSameOrigin, requireLocalAdmin, (req, res) => {
   const id = String(req.params.id || '');
   const products = readProducts();
-  const next = products.filter((item) => item.id !== id);
+  const filtered = products.filter((item) => item.id !== id);
 
-  if (next.length === products.length) {
-    return res.status(404).json({ error: 'Produto não encontrado.' });
+  if (filtered.length === products.length) {
+    return res.status(404).json({ error: 'Produto n\u00e3o encontrado.' });
   }
 
-  saveProducts(next);
+  saveProducts(filtered);
   return res.json({ ok: true });
 });
 
@@ -451,7 +561,7 @@ app.post('/api/admin/deploy', requireSameOrigin, requireLocalAdmin, (req, res) =
   try {
     const siteDir = path.join(__dirname, '..');
     execSync('git add -A', { cwd: siteDir, timeout: 10000 });
-    execSync('git commit -m "Atualização automática via painel"', { cwd: siteDir, timeout: 10000, stdio: 'pipe' });
+    execSync('git commit -m "Atualiza\u00e7\u00e3o autom\u00e1tica via painel"', { cwd: siteDir, timeout: 10000, stdio: 'pipe' });
     execSync('git push', { cwd: siteDir, timeout: 30000, stdio: 'pipe' });
     return res.json({ ok: true, output: 'Publicado!' });
   } catch (error) {
@@ -461,9 +571,166 @@ app.post('/api/admin/deploy', requireSameOrigin, requireLocalAdmin, (req, res) =
   }
 });
 
+// -- Admin Panel (new session-based system) ---------------------------------
+
+app.post('/api/adminpanel/login', (req, res) => {
+  const requester = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown')
+    .replace('::ffff:', '').split(',')[0].trim();
+
+  if (!enforceRateLimit(`adminpanel-login:${requester}`, 5, 15 * 60 * 1000)) {
+    return res.status(429).json({ error: 'Muitas tentativas. Tente novamente em alguns minutos.' });
+  }
+
+  const pin = String(req.body?.pin || '');
+  if (!verifyAdminPin(pin)) {
+    return res.status(401).json({ error: 'PIN inv\u00e1lido.' });
+  }
+
+  const sessionId = createAdminSession();
+  const secureFlag = process.env.NODE_ENV === 'production' ? '; Secure' : '';
+  res.setHeader('Set-Cookie', `tpoll_admin_session=${encodeURIComponent(sessionId)}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${SESSION_TTL_SECONDS}${secureFlag}`);
+  logAdminAction('LOGIN', { ip: requester });
+  return res.json({ ok: true });
+});
+
+app.post('/api/adminpanel/logout', (req, res) => {
+  const cookies = parseCookies(req);
+  const sessionId = cookies.tpoll_admin_session;
+  if (sessionId) destroyAdminSession(sessionId);
+  res.setHeader('Set-Cookie', 'tpoll_admin_session=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0');
+  logAdminAction('LOGOUT', {});
+  return res.json({ ok: true });
+});
+
+app.get('/api/adminpanel/status', (req, res) => {
+  const cookies = parseCookies(req);
+  const sessionId = cookies.tpoll_admin_session;
+  const loggedIn = verifyAdminSession(sessionId);
+  return res.json({ loggedIn });
+});
+
+app.get('/api/adminpanel/products', requireAdminSession, (req, res) => {
+  res.json({ products: readProducts() });
+});
+
+app.post('/api/adminpanel/products', requireAdminSession, (req, res) => {
+  const product = normalizeProduct(req.body || {});
+
+  if (!product.name) {
+    return res.status(400).json({ error: 'Informe o nome do produto.' });
+  }
+
+  if (product.price <= 0) {
+    return res.status(400).json({ error: 'Informe um pre\u00e7o v\u00e1lido.' });
+  }
+
+  const products = readProducts();
+  products.unshift(product);
+  saveProducts(products);
+  logAdminAction('CREATE_PRODUCT', { name: product.name, price: product.price });
+  return res.status(201).json(product);
+});
+
+app.put('/api/adminpanel/products/:id', requireAdminSession, (req, res) => {
+  const id = String(req.params.id || '');
+  const products = readProducts();
+  const index = products.findIndex((item) => item.id === id);
+
+  if (index < 0) {
+    return res.status(404).json({ error: 'Produto n\u00e3o encontrado.' });
+  }
+
+  const oldProduct = products[index];
+  const updated = normalizeProduct({ ...req.body, id });
+  if (!updated.name) {
+    return res.status(400).json({ error: 'Informe o nome do produto.' });
+  }
+
+  if (updated.price <= 0) {
+    return res.status(400).json({ error: 'Informe um pre\u00e7o v\u00e1lido.' });
+  }
+
+  const changes = {};
+  if (oldProduct.price !== updated.price) changes.price = { from: oldProduct.price, to: updated.price };
+  if (oldProduct.stock !== updated.stock) changes.stock = { from: oldProduct.stock, to: updated.stock };
+  if (oldProduct.promoPrice !== updated.promoPrice) changes.promoPrice = { from: oldProduct.promoPrice, to: updated.promoPrice };
+  if (oldProduct.featured !== updated.featured) changes.featured = { from: oldProduct.featured, to: updated.featured };
+  if (oldProduct.active !== updated.active) changes.active = { from: oldProduct.active, to: updated.active };
+
+  products[index] = updated;
+  saveProducts(products);
+  logAdminAction('UPDATE_PRODUCT', { id, name: updated.name, changes });
+  return res.json(updated);
+});
+
+app.delete('/api/adminpanel/products/:id', requireAdminSession, (req, res) => {
+  const id = String(req.params.id || '');
+  const products = readProducts();
+  const product = products.find((item) => item.id === id);
+  const filtered = products.filter((item) => item.id !== id);
+
+  if (filtered.length === products.length) {
+    return res.status(404).json({ error: 'Produto n\u00e3o encontrado.' });
+  }
+
+  saveProducts(filtered);
+  logAdminAction('DELETE_PRODUCT', { id, name: product ? product.name : 'unknown' });
+  return res.json({ ok: true });
+});
+
+app.post('/api/adminpanel/upload', requireAdminSession, upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'Nenhum arquivo enviado.' });
+    }
+    const url = await processUpload(req.file);
+    logAdminAction('UPLOAD', { url });
+    return res.json({ url });
+  } catch (err) {
+    return res.status(500).json({ error: err.message || 'Erro ao processar upload.' });
+  }
+});
+
+app.get('/api/adminpanel/stats', requireAdminSession, (req, res) => {
+  const products = readProducts();
+  const totalValue = products.reduce((sum, p) => sum + ((p.promoPrice || p.price || 0) * (p.stock || 0)), 0);
+  const stats = {
+    total: products.length,
+    active: products.filter((p) => p.active).length,
+    outOfStock: products.filter((p) => p.stock <= 0).length,
+    onSale: products.filter((p) => p.onSale).length,
+    featured: products.filter((p) => p.featured).length,
+    totalValue: Math.round(totalValue * 100) / 100
+  };
+  return res.json(stats);
+});
+
+app.get('/api/adminpanel/logs', requireAdminSession, (req, res) => {
+  const logs = readJsonSafe(ADMIN_LOGS_FILE, []);
+  return res.json({ logs: logs.slice(0, 100) });
+});
+
+app.post('/api/adminpanel/deploy', requireAdminSession, (req, res) => {
+  try {
+    const siteDir = path.join(__dirname, '..');
+    execSync('git add -A', { cwd: siteDir, timeout: 10000 });
+    execSync('git commit -m "Atualiza\u00e7\u00e3o autom\u00e1tica via painel"', { cwd: siteDir, timeout: 10000, stdio: 'pipe' });
+    execSync('git push', { cwd: siteDir, timeout: 30000, stdio: 'pipe' });
+    logAdminAction('DEPLOY', { output: 'Publicado!' });
+    return res.json({ ok: true, output: 'Publicado!' });
+  } catch (error) {
+    const msg = error.stderr ? error.stderr.toString() : error.message;
+    if (msg.includes('nothing to commit')) return res.json({ ok: true, output: 'Nada para publicar.' });
+    return res.status(500).json({ error: msg });
+  }
+});
+
+// -- Static files & pages ---------------------------------------------------
+
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
-// ── Auth page routes ──────────────────────────────────────────────────────
+// -- Auth page routes -------------------------------------------------------
+
 const authPages = {
   '/login':               ['modules', 'auth', 'pages', 'Login.html'],
   '/cadastro':            ['modules', 'auth', 'pages', 'Register.html'],
@@ -479,11 +746,18 @@ app.get('/painel-admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'modules', 'auth', 'pages', 'AdminPanel.html'));
 });
 
+app.get('/adminpanel', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'adminpanel.html'));
+});
+
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'html', 'index.html'));
 });
 
+// -- Init -------------------------------------------------------------------
+
 ensureDataFile();
+ensureAdminAuth();
 
 app.listen(PORT, () => {
   console.log(`TPoll server running on http://127.0.0.1:${PORT}`);
