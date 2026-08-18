@@ -57,6 +57,7 @@
             <button type="button" class="ap-tab active" data-tab="products">Produtos</button>
             <button type="button" class="ap-tab" data-tab="stats">Stats</button>
             <button type="button" class="ap-tab" data-tab="logs">Atividade</button>
+            <button type="button" class="ap-tab" data-tab="settings">Config</button>
             <button type="button" class="ap-tab" data-tab="deploy">Publicar</button>
         </nav>
 
@@ -162,6 +163,26 @@
             <div class="ap-section-header"><h2>Atividade Recente</h2></div>
             <div id="logsList" class="ap-logs-list"></div>
             <div id="logsEmpty" class="ap-empty" hidden>Nenhuma atividade registrada.</div>
+        </section>
+
+        <!-- SETTINGS TAB -->
+        <section id="tabSettings" class="ap-tab-content" hidden>
+            <div class="ap-section-header"><h2>Configurações</h2></div>
+            <div class="ap-settings-card">
+                <div class="ap-form-group">
+                    <label for="settingsToken">GitHub Token (necessário para cadastrar/editar)</label>
+                    <div class="ap-settings-row">
+                        <input type="password" id="settingsToken" class="ap-input" placeholder="ghp_...">
+                        <button type="button" id="settingsToggleVis" class="ap-btn ap-btn-ghost ap-btn-sm">Ver</button>
+                    </div>
+                    <small class="ap-settings-hint">Crie em: GitHub → Settings → Developer settings → Personal access tokens → <strong>repo</strong> scope</small>
+                </div>
+                <div class="ap-settings-actions">
+                    <button type="button" id="settingsSaveToken" class="ap-btn ap-btn-primary">Salvar token</button>
+                    <button type="button" id="settingsClearToken" class="ap-btn ap-btn-ghost">Limpar token</button>
+                </div>
+                <div id="settingsTokenStatus" class="ap-settings-status"></div>
+            </div>
         </section>
 
         <!-- DEPLOY TAB -->

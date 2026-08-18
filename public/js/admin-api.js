@@ -85,6 +85,17 @@
     }
 
     /* ------------------------------------------------------- */
+    /*  Token check for writes                                  */
+    /* ------------------------------------------------------- */
+    function requireToken() {
+        if (isLocal) return; // local server handles auth
+        const token = getToken();
+        if (!token) {
+            throw new Error('Para cadastrar/editar produtos, salve um token GitHub. Vá em Configurações no painel.');
+        }
+    }
+
+    /* ------------------------------------------------------- */
     /*  Public API (works in both environments)                 */
     /* ------------------------------------------------------- */
     const adminApi = {
@@ -171,6 +182,7 @@
         },
 
         async createProduct(product) {
+            requireToken();
             if (isLocal) {
                 const res = await fetch('/api/adminpanel/products', {
                     method: 'POST',
@@ -206,6 +218,7 @@
         },
 
         async updateProduct(id, updates) {
+            requireToken();
             if (isLocal) {
                 const res = await fetch(`/api/adminpanel/products/${id}`, {
                     method: 'PUT',
@@ -230,6 +243,7 @@
         },
 
         async deleteProduct(id) {
+            requireToken();
             if (isLocal) {
                 const res = await fetch(`/api/adminpanel/products/${id}`, {
                     method: 'DELETE',
@@ -253,6 +267,7 @@
 
         /* --- Upload ---------------------------------------- */
         async uploadImage(file) {
+            requireToken();
             if (isLocal) {
                 const fd = new FormData();
                 fd.append('image', file);

@@ -481,6 +481,25 @@ textarea.ap-input { resize: vertical; min-height: 60px; }
 }
 @keyframes ap-spin { to { transform: rotate(360deg); } }
 
+/* SETTINGS ------------------------------------------------- */
+.ap-settings-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.ap-settings-row { display: flex; gap: 8px; }
+.ap-settings-row .ap-input { flex: 1; }
+.ap-settings-hint { font-size: 0.75rem; color: var(--text2); margin-top: 4px; }
+.ap-settings-hint strong { color: var(--accent); }
+.ap-settings-actions { display: flex; gap: 8px; }
+.ap-settings-status { font-size: 0.8125rem; min-height: 20px; }
+.ap-settings-status.success { color: var(--green); }
+.ap-settings-status.error { color: var(--red); }
+
 /* PWA INSTALL BANNER --------------------------------------- */
 .ap-install-banner {
     position: fixed;

@@ -124,6 +124,7 @@
         }
         if (name === 'stats') loadStats();
         if (name === 'logs') loadLogs();
+        if (name === 'settings') loadSettings();
     }
 
     tabs.forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
@@ -371,6 +372,55 @@
             });
         } catch {}
     }
+
+    /* ------------------------------------------------------- */
+    /*  Settings                                                */
+    /* ------------------------------------------------------- */
+    function loadSettings() {
+        const tokenInput = $('#settingsToken');
+        const status = $('#settingsTokenStatus');
+        const stored = localStorage.getItem('tpoll_github_token');
+        if (tokenInput) tokenInput.value = stored || '';
+        if (status) {
+            if (stored) {
+                status.textContent = 'Token salvo.';
+                status.className = 'ap-settings-status success';
+            } else {
+                status.textContent = 'Nenhum token salvo. Cadastro/edição indisponível.';
+                status.className = 'ap-settings-status error';
+            }
+        }
+    }
+
+    $('#settingsSaveToken')?.addEventListener('click', async () => {
+        const token = ($('#settingsToken')?.value || '').trim();
+        const status = $('#settingsTokenStatus');
+        if (!token) { if (status) { status.textContent = 'Cole o token.'; status.className = 'ap-settings-status error'; } return; }
+        try {
+            await api.loginWithToken(token);
+            if (status) { status.textContent = 'Token salvo e validado!'; status.className = 'ap-settings-status success'; }
+            toast('Token salvo!');
+        } catch (err) {
+            if (status) { status.textContent = err.message; status.className = 'ap-settings-status error'; }
+        }
+    });
+
+    $('#settingsClearToken')?.addEventListener('click', () => {
+        localStorage.removeItem('tpoll_github_token');
+        const tokenInput = $('#settingsToken');
+        const status = $('#settingsTokenStatus');
+        if (tokenInput) tokenInput.value = '';
+        if (status) { status.textContent = 'Token removido.'; status.className = 'ap-settings-status'; }
+        toast('Token removido');
+    });
+
+    $('#settingsToggleVis')?.addEventListener('click', () => {
+        const input = $('#settingsToken');
+        if (!input) return;
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        $('#settingsToggleVis').textContent = isPassword ? 'Ocultar' : 'Ver';
+    });
 
     /* ------------------------------------------------------- */
     /*  Deploy                                                  */
