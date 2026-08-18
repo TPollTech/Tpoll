@@ -1,4 +1,7 @@
 (function () {
+    const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+    const GITHUB_API = 'https://api.github.com/repos/TPollTech/Tpoll/contents/server/store-data.json?ref=main';
+
     async function apiRequest(url, options) {
         const requestOptions = options || {};
 
@@ -23,15 +26,35 @@
     }
 
     async function loadStoreProducts() {
-        try {
-            const apiProducts = await apiRequest('/api/store/products', { method: 'GET' });
-            if (Array.isArray(apiProducts)) return apiProducts;
-        } catch (error) {
-            // fallback para ambientes estáticos (sem backend Node ativo)
+        // 1. Try local server API
+        if (isLocal) {
+            try {
+                const apiProducts = await apiRequest('/api/store/products', { method: 'GET' });
+                if (Array.isArray(apiProducts)) return apiProducts;
+            } catch (error) {
+                // fallback below
+            }
         }
 
+        // 2. Try GitHub API (works without auth for public repos)
+        try {
+            const res = await fetch(GITHUB_API, {
+                headers: { 'Accept': 'application/vnd.github.v3+json' }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                const decoded = decodeURIComponent(escape(atob(data.content.replace(/\n/g, ''))));
+                const products = JSON.parse(decoded);
+                if (Array.isArray(products)) return products;
+            }
+        } catch (error) {
+            // fallback below
+        }
+
+        // 3. Static fallback file
         const fallbackCandidates = [
-            '../assets/data/products.json'
+            '../assets/data/products.json',
+            'assets/data/products.json'
         ];
 
         for (const fallbackPath of fallbackCandidates) {
@@ -42,7 +65,7 @@
                 const fallbackData = await fallbackResponse.json();
                 if (Array.isArray(fallbackData)) return fallbackData;
             } catch (fallbackError) {
-                // tenta o próximo caminho de fallback
+                // tenta o próximo caminho
             }
         }
 
