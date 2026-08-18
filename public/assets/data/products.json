@@ -24,28 +24,30 @@
     "promoPrice": 0
   },
   {
-    "image": "assets/fotos-produtos/aplicadas/produto-3-mouse-com-fio-ms100.png",
-    "stock": 3,
     "id": "3",
-    "price": 18,
+    "name": "Mouse Com Fio Multilaser MS100",
     "category": "Periféricos / Mouse",
     "description": "Mouse com fio Multilaser MS100. Plug-and-play, conexão USB confiável.",
-    "name": "Mouse Com Fio Multilaser MS100",
+    "price": 18,
+    "promoPrice": 0,
     "onSale": false,
+    "stock": 0,
+    "image": "assets/fotos-produtos/aplicadas/produto-3-mouse-com-fio-ms100.png",
     "active": true,
-    "promoPrice": 0
+    "featured": false
   },
   {
-    "image": "assets/fotos-produtos/aplicadas/produto-4-fonte-universal.png",
-    "stock": 1,
     "id": "4",
-    "price": 50,
+    "name": "Fonte Universal Lemox",
     "category": "Fontes / Energia",
     "description": "Fonte universal Lemox, acompanha vários plugs e adaptadores para notebooks e eletrônicos.",
-    "name": "Fonte Universal Lemox",
+    "price": 50,
+    "promoPrice": 0,
     "onSale": false,
+    "stock": 0,
+    "image": "assets/fotos-produtos/aplicadas/produto-4-fonte-universal.png",
     "active": true,
-    "promoPrice": 0
+    "featured": false
   },
   {
     "image": "assets/fotos-produtos/aplicadas/produto-5-adaptador-vga-hdmi.png",
@@ -84,16 +86,17 @@
     "promoPrice": 0
   },
   {
-    "image": "assets/fotos-produtos/aplicadas/produto-8-hub-usb.png",
-    "stock": 1,
     "id": "8",
-    "price": 30,
+    "name": "Hub USB 4 Portas",
     "category": "Adaptadores / USB",
     "description": "Hub USB com 4 portas, expanda as entradas USB do seu computador de forma prática.",
-    "name": "Hub USB 4 Portas",
+    "price": 30,
+    "promoPrice": 0,
     "onSale": false,
+    "stock": 0,
+    "image": "assets/fotos-produtos/aplicadas/produto-8-hub-usb.png",
     "active": true,
-    "promoPrice": 0
+    "featured": false
   },
   {
     "image": "assets/fotos-produtos/aplicadas/produto-9-case-externo-hd.png",
@@ -108,7 +111,7 @@
     "promoPrice": 0
   },
   {
-    "image": "assets/fotos-produtos/aplicadas/produto-10-adaptador-hdmi-displayport.png",
+    "image": "",
     "stock": 1,
     "id": "10",
     "price": 25,
@@ -120,7 +123,7 @@
     "promoPrice": 0
   },
   {
-    "image": "assets/fotos-produtos/aplicadas/produto-11-adaptador-de-som-usb.png",
+    "image": "",
     "stock": 1,
     "id": "11",
     "price": 30,
@@ -132,7 +135,7 @@
     "promoPrice": 0
   },
   {
-    "image": "assets/fotos-produtos/aplicadas/produto-12-adaptador-displayport-vga.png",
+    "image": "",
     "stock": 1,
     "id": "12",
     "price": 30,
@@ -144,7 +147,7 @@
     "promoPrice": 0
   },
   {
-    "image": "assets/fotos-produtos/aplicadas/produto-13-carregador-veicular.png",
+    "image": "",
     "stock": 4,
     "id": "13",
     "price": 16,
@@ -156,7 +159,7 @@
     "promoPrice": 0
   },
   {
-    "image": "assets/fotos-produtos/aplicadas/produto-14-adaptador-hdmi-dvi.png",
+    "image": "",
     "stock": 2,
     "id": "14",
     "price": 15,
@@ -168,19 +171,20 @@
     "promoPrice": 0
   },
   {
-    "image": "assets/fotos-produtos/aplicadas/produto-15-powerbank-10000.png",
-    "stock": 1,
     "id": "15",
-    "price": 120,
+    "name": "Powerbank 10.000mAh",
     "category": "Energia / Powerbank",
     "description": "Powerbank 10.000mAh, carregue seu celular múltiplas vezes onde estiver.",
-    "name": "Powerbank 10.000mAh",
+    "price": 120,
+    "promoPrice": 0,
     "onSale": false,
+    "stock": 0,
+    "image": "assets/product-images/power.svg",
     "active": true,
-    "promoPrice": 0
+    "featured": false
   },
   {
-    "image": "assets/fotos-produtos/aplicadas/produto-16-cabo-tipo-c-tipo-c.png",
+    "image": "",
     "stock": 3,
     "id": "16",
     "price": 30,
@@ -192,7 +196,7 @@
     "promoPrice": 0
   },
   {
-    "image": "assets/fotos-produtos/aplicadas/produto-17-cabo-tipo-c-lightning.png",
+    "image": "",
     "stock": 1,
     "id": "17",
     "price": 30,
@@ -204,7 +208,7 @@
     "promoPrice": 0
   },
   {
-    "image": "assets/fotos-produtos/aplicadas/produto-18-cabo-micro-usb.png",
+    "image": "",
     "stock": 21,
     "id": "18",
     "price": 24,
@@ -216,7 +220,7 @@
     "promoPrice": 0
   },
   {
-    "image": "assets/fotos-produtos/aplicadas/produto-19-cabo-tipo-c.png",
+    "image": "",
     "stock": 12,
     "id": "19",
     "price": 24,
@@ -276,16 +280,17 @@
     "promoPrice": 0
   },
   {
-    "image": "assets/fotos-produtos/aplicadas/produto-24-pendrive-16gb.png",
-    "stock": 2,
     "id": "24",
-    "price": 45,
+    "name": "Pendrive 16GB",
     "category": "Armazenamento",
     "description": "Pendrive 16GB para armazenamento e transporte de arquivos.",
-    "name": "Pendrive 16GB",
+    "price": 45,
+    "promoPrice": 0,
     "onSale": false,
+    "stock": 0,
+    "image": "assets/fotos-produtos/aplicadas/produto-24-pendrive-16gb.png",
     "active": true,
-    "promoPrice": 0
+    "featured": false
   },
   {
     "image": "assets/fotos-produtos/aplicadas/produto-25-pendrive-32gb.png",
@@ -396,16 +401,17 @@
     "promoPrice": 0
   },
   {
-    "image": "assets/fotos-produtos/aplicadas/produto-34-smart-tag-ios.png",
-    "stock": 1,
     "id": "34",
-    "price": 60,
+    "name": "SmartTag para Apple",
     "category": "Rastreador inteligente",
     "description": "SmartTag para Apple/iPhone para localização de itens pessoais.",
-    "name": "SmartTag para Apple",
+    "price": 60,
+    "promoPrice": 0,
     "onSale": false,
+    "stock": 0,
+    "image": "assets/fotos-produtos/aplicadas/produto-34-smart-tag-ios.png",
     "active": true,
-    "promoPrice": 0
+    "featured": false
   },
   {
     "image": "assets/fotos-produtos/aplicadas/produto-35-smart-tag-android.png",
@@ -428,7 +434,7 @@
     "description": "Rádio USB portátil para reprodução e uso prático no dia a dia.",
     "name": "Rádio USB",
     "onSale": false,
-    "active": false,
+    "active": true,
     "promoPrice": 0
   },
   {
@@ -468,28 +474,30 @@
     "promoPrice": 0
   },
   {
-    "image": "assets/fotos-produtos/aplicadas/produto-40-kit-teclado-mouse-sem-fio.png",
-    "stock": 1,
     "id": "40",
-    "price": 90,
+    "name": "Kit teclado e mouse sem fio Bluetooth",
     "category": "Periféricos",
     "description": "Kit teclado e mouse sem fio Bluetooth com autonomia estimada de até 150 horas.",
-    "name": "Kit teclado e mouse sem fio Bluetooth",
+    "price": 90,
+    "promoPrice": 0,
     "onSale": false,
+    "stock": 0,
+    "image": "assets/fotos-produtos/aplicadas/produto-40-kit-teclado-mouse-sem-fio.png",
     "active": true,
-    "promoPrice": 0
+    "featured": false
   },
   {
-    "image": "assets/fotos-produtos/aplicadas/produto-41-caixa-de-som-pc.png",
-    "stock": 1,
     "id": "41",
-    "price": 40,
+    "name": "Caixa de som Extrad XDG1001",
     "category": "Áudio",
     "description": "Caixa de som Extrad XDG1001 para PC, som prático para uso diário.",
-    "name": "Caixa de som Extrad XDG1001",
+    "price": 40,
+    "promoPrice": 0,
     "onSale": false,
+    "stock": 0,
+    "image": "assets/fotos-produtos/aplicadas/produto-41-caixa-de-som-pc.png",
     "active": true,
-    "promoPrice": 0
+    "featured": false
   },
   {
     "image": "assets/fotos-produtos/aplicadas/produto-42-caixas-de-som-pc.png",
@@ -504,27 +512,29 @@
     "promoPrice": 0
   },
   {
-    "image": "assets/fotos-produtos/aplicadas/produto-43-teclado-com-fio.png",
-    "stock": 1,
     "id": "43",
-    "price": 50,
+    "name": "Teclado com fio TF100",
     "category": "Periféricos",
     "description": "Teclado com fio TF100 para trabalho e uso diário.",
-    "name": "Teclado com fio TF100",
+    "price": 50,
+    "promoPrice": 0,
     "onSale": false,
+    "stock": 0,
+    "image": "assets/fotos-produtos/aplicadas/produto-43-teclado-com-fio.png",
     "active": true,
-    "promoPrice": 0
+    "featured": false
   },
   {
-    "image": "assets/fotos-produtos/aplicadas/produto-44-kit-teclado-mouse-com-fio.png",
-    "stock": 1,
     "id": "44",
-    "price": 60,
+    "name": "Kit teclado e mouse com fio Canup",
     "category": "Periféricos",
     "description": "Kit teclado e mouse com fio Canup para uso profissional e doméstico.",
-    "name": "Kit teclado e mouse com fio Canup",
+    "price": 60,
+    "promoPrice": 0,
     "onSale": false,
+    "stock": 0,
+    "image": "assets/fotos-produtos/aplicadas/produto-44-kit-teclado-mouse-com-fio.png",
     "active": true,
-    "promoPrice": 0
+    "featured": false
   }
 ]
