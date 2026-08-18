@@ -1,5 +1,4 @@
 node_modules/
-server/store-data.json
 # Auth data files — contain sensitive user data
 server/modules/auth/data/
 server/admin-auth.json
