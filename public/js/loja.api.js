@@ -1,6 +1,6 @@
 (function () {
     const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-    const GITHUB_API = 'https://api.github.com/repos/TPollTech/Tpoll/contents/server/store-data.json?ref=main';
+    const GITHUB_RAW = 'https://raw.githubusercontent.com/TPollTech/Tpoll/main/server/store-data.json';
 
     async function apiRequest(url, options) {
         const response = await fetch(url, {
@@ -23,21 +23,14 @@
             } catch {}
         }
 
-        // 2. GitHub API (needs token for private repo)
-        const token = localStorage.getItem('tpoll_github_token') || '';
-        if (token) {
-            try {
-                const res = await fetch(GITHUB_API, {
-                    headers: { 'Accept': 'application/vnd.github.v3+json', 'Authorization': `token ${token}` }
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    const decoded = decodeURIComponent(escape(atob(data.content.replace(/\n/g, ''))));
-                    const products = JSON.parse(decoded);
-                    if (Array.isArray(products)) return products;
-                }
-            } catch {}
-        }
+        // 2. GitHub raw (public repo, no auth needed)
+        try {
+            const res = await fetch(GITHUB_RAW, { cache: 'no-store' });
+            if (res.ok) {
+                const products = await res.json();
+                if (Array.isArray(products)) return products;
+            }
+        } catch {}
 
         // 3. Static fallback
         const fallbacks = ['../assets/data/products.json', 'assets/data/products.json'];

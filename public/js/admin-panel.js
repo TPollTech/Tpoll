@@ -383,11 +383,11 @@
         if (tokenInput) tokenInput.value = stored || '';
         if (status) {
             if (stored) {
-                status.textContent = 'Token salvo.';
+                status.textContent = 'Token salvo. Cadastro/edição disponível.';
                 status.className = 'ap-settings-status success';
             } else {
-                status.textContent = 'Nenhum token salvo. Cadastro/edição indisponível.';
-                status.className = 'ap-settings-status error';
+                status.textContent = 'Sem token. Leitura funciona, mas cadastro/edição precisa de token.';
+                status.className = 'ap-settings-status';
             }
         }
     }
