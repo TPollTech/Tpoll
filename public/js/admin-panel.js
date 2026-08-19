@@ -45,6 +45,10 @@
     const logsList        = $('#logsList');
     const logsEmpty       = $('#logsEmpty');
     const userInfoEl      = $('#userInfo');
+    const tokenBanner     = $('#tokenBanner');
+    const tokenBannerInput= $('#tokenBannerInput');
+    const tokenBannerSave = $('#tokenBannerSave');
+    const tokenBannerStatus = $('#tokenBannerStatus');
 
     /* ------------------------------------------------------- */
     /*  Auth                                                    */
@@ -65,7 +69,17 @@
         adminPanel.hidden = false;
         adminPanel.style.display = '';
         if (userInfoEl && user) userInfoEl.textContent = user;
+        updateTokenBanner();
         switchTab('products');
+    }
+
+    function updateTokenBanner() {
+        if (!tokenBanner) return;
+        if (!api.isLocal && !api.hasToken()) {
+            tokenBanner.hidden = false;
+        } else {
+            tokenBanner.hidden = true;
+        }
     }
 
     async function checkSession() {
@@ -104,6 +118,25 @@
         try { await api.logout(); } catch {}
         showLogin();
     });
+
+    /* ------------------------------------------------------- */
+    /*  Token Banner                                            */
+    /* ------------------------------------------------------- */
+    if (tokenBannerSave) {
+        tokenBannerSave.addEventListener('click', async () => {
+            const token = (tokenBannerInput?.value || '').trim();
+            if (!token) { if (tokenBannerStatus) { tokenBannerStatus.textContent = 'Cole o token.'; tokenBannerStatus.className = 'ap-token-banner-status error'; } return; }
+            try {
+                await api.loginWithToken(token);
+                if (tokenBannerStatus) { tokenBannerStatus.textContent = 'Token salvo! Operações de escrita disponíveis.'; tokenBannerStatus.className = 'ap-token-banner-status success'; }
+                tokenBannerInput.value = '';
+                toast('Token salvo!');
+                setTimeout(() => { updateTokenBanner(); }, 1500);
+            } catch (err) {
+                if (tokenBannerStatus) { tokenBannerStatus.textContent = err.message; tokenBannerStatus.className = 'ap-token-banner-status error'; }
+            }
+        });
+    }
 
     /* ------------------------------------------------------- */
     /*  Tabs                                                    */

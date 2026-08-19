@@ -481,6 +481,36 @@ textarea.ap-input { resize: vertical; min-height: 60px; }
 }
 @keyframes ap-spin { to { transform: rotate(360deg); } }
 
+/* TOKEN BANNER -------------------------------------------- */
+.ap-token-banner {
+    background: rgba(210, 153, 34, 0.08);
+    border: 1px solid rgba(210, 153, 34, 0.3);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin: 0 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.ap-token-banner-text {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.8125rem;
+    color: var(--text2);
+    line-height: 1.4;
+}
+.ap-token-banner-text svg { flex-shrink: 0; color: var(--yellow); margin-top: 1px; }
+.ap-token-banner-text strong { color: var(--text1); }
+.ap-token-banner-input {
+    display: flex;
+    gap: 8px;
+}
+.ap-token-banner-input .ap-input { flex: 1; font-size: 0.8125rem; }
+.ap-token-banner-status { font-size: 0.75rem; min-height: 16px; }
+.ap-token-banner-status.success { color: var(--green); }
+.ap-token-banner-status.error { color: var(--red); }
+
 /* SETTINGS ------------------------------------------------- */
 .ap-discount-preview { justify-content: flex-end; }
 .ap-discount-badge {
