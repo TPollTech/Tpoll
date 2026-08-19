@@ -31,8 +31,13 @@ const DEFAULT_ADMIN_PIN = process.env.TPOLL_ADMIN_PIN || '240726';
 const BCRYPT_ROUNDS = 12;
 
 if (IS_PRODUCTION && (!TOKEN_SECRET || TOKEN_SECRET.length < 32)) {
-  throw new Error('Defina TPOLL_TOKEN_SECRET com pelo menos 32 caracteres.');
+  console.warn('TPOLL_TOKEN_SECRET não definido — gerando automaticamente (válido apenas durante esta sessão).');
 }
+
+// Generate a runtime secret if none provided (survives until restart)
+const effectiveTokenSecret = (TOKEN_SECRET && TOKEN_SECRET.length >= 32)
+  ? TOKEN_SECRET
+  : crypto.randomBytes(48).toString('hex');
 
 const rateLimitState = new Map();
 
@@ -167,7 +172,7 @@ function enforceRateLimit(key, limit, windowMs) {
 }
 
 function signPayload(payloadBase64) {
-  return crypto.createHmac('sha256', TOKEN_SECRET).update(payloadBase64).digest('hex');
+  return crypto.createHmac('sha256', effectiveTokenSecret).update(payloadBase64).digest('hex');
 }
 
 function createAdminToken() {
