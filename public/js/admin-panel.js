@@ -461,7 +461,7 @@
     /*  PWA                                                     */
     /* ------------------------------------------------------- */
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('adminpanel/sw.js').catch(() => {});
+        navigator.serviceWorker.register('/adminpanel/sw.js').catch(() => {});
     }
 
     // PWA Install prompt

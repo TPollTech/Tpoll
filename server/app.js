@@ -802,7 +802,7 @@ app.get('/painel-admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'modules', 'auth', 'pages', 'AdminPanel.html'));
 });
 
-app.get('/adminpanel', (req, res) => {
+app.get(['/adminpanel', '/adminpanel/'], (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'adminpanel.html'));
 });
 
