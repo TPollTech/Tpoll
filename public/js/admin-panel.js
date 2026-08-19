@@ -44,7 +44,6 @@
     const statsGrid       = $('#statsGrid');
     const logsList        = $('#logsList');
     const logsEmpty       = $('#logsEmpty');
-    const deployStatus    = $('#deployStatus');
     const userInfoEl      = $('#userInfo');
 
     /* ------------------------------------------------------- */
@@ -124,7 +123,6 @@
         }
         if (name === 'stats') loadStats();
         if (name === 'logs') loadLogs();
-        if (name === 'settings') loadSettings();
     }
 
     tabs.forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
@@ -230,6 +228,18 @@
         $('#pf_imageUrl').value = product ? (product.image || '') : '';
         currentImageUrl = product ? (product.image || '') : '';
 
+        // Calculate discount % from price/promoPrice
+        const discountInput = $('#pf_discount');
+        if (discountInput) {
+            if (product && product.price && product.promoPrice && product.price > 0) {
+                const pct = Math.round((1 - product.promoPrice / product.price) * 100);
+                discountInput.value = pct > 0 && pct < 100 ? pct : '';
+            } else {
+                discountInput.value = '';
+            }
+            updateDiscountPreview();
+        }
+
         const preview = $('#pf_imagePreview');
         const placeholder = $('#pf_imagePlaceholder');
         if (currentImageUrl) { preview.src = currentImageUrl; preview.hidden = false; placeholder.hidden = true; }
@@ -245,6 +255,47 @@
         const p = allProducts.find(x => x.id === id);
         if (p) openForm(p);
     }
+
+    /* ------------------------------------------------------- */
+    /*  Discount % helpers                                      */
+    /* ------------------------------------------------------- */
+    function updateDiscountPreview() {
+        const container = $('#discountPreview');
+        if (!container) return;
+        const pct = parseInt($('#pf_discount')?.value) || 0;
+        const price = parseFloat($('#pf_price')?.value) || 0;
+        if (pct > 0 && pct < 100 && price > 0) {
+            const final = Math.round(price * (1 - pct / 100) * 100) / 100;
+            $('#discountPercent').textContent = pct;
+            $('#discountFinal').textContent = final.toFixed(2);
+            container.hidden = false;
+        } else {
+            container.hidden = true;
+        }
+    }
+
+    $('#pf_discount')?.addEventListener('input', () => {
+        const price = parseFloat($('#pf_price')?.value) || 0;
+        const pct = parseInt($('#pf_discount')?.value) || 0;
+        if (price > 0 && pct > 0 && pct < 100) {
+            const promo = Math.round(price * (1 - pct / 100) * 100) / 100;
+            $('#pf_promoPrice').value = promo.toFixed(2);
+        }
+        updateDiscountPreview();
+    });
+
+    $('#pf_price')?.addEventListener('input', () => {
+        const discountInput = $('#pf_discount');
+        if (discountInput && discountInput.value) {
+            const price = parseFloat($('#pf_price')?.value) || 0;
+            const pct = parseInt(discountInput.value) || 0;
+            if (price > 0 && pct > 0 && pct < 100) {
+                const promo = Math.round(price * (1 - pct / 100) * 100) / 100;
+                $('#pf_promoPrice').value = promo.toFixed(2);
+            }
+            updateDiscountPreview();
+        }
+    });
 
     productForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -372,76 +423,6 @@
             });
         } catch {}
     }
-
-    /* ------------------------------------------------------- */
-    /*  Settings                                                */
-    /* ------------------------------------------------------- */
-    function loadSettings() {
-        const tokenInput = $('#settingsToken');
-        const status = $('#settingsTokenStatus');
-        const stored = localStorage.getItem('tpoll_github_token');
-        if (tokenInput) tokenInput.value = stored || '';
-        if (status) {
-            if (stored) {
-                status.textContent = 'Token salvo. Cadastro/edição disponível.';
-                status.className = 'ap-settings-status success';
-            } else {
-                status.textContent = 'Sem token. Leitura funciona, mas cadastro/edição precisa de token.';
-                status.className = 'ap-settings-status';
-            }
-        }
-    }
-
-    $('#settingsSaveToken')?.addEventListener('click', async () => {
-        const token = ($('#settingsToken')?.value || '').trim();
-        const status = $('#settingsTokenStatus');
-        if (!token) { if (status) { status.textContent = 'Cole o token.'; status.className = 'ap-settings-status error'; } return; }
-        try {
-            await api.loginWithToken(token);
-            if (status) { status.textContent = 'Token salvo e validado!'; status.className = 'ap-settings-status success'; }
-            toast('Token salvo!');
-        } catch (err) {
-            if (status) { status.textContent = err.message; status.className = 'ap-settings-status error'; }
-        }
-    });
-
-    $('#settingsClearToken')?.addEventListener('click', () => {
-        localStorage.removeItem('tpoll_github_token');
-        const tokenInput = $('#settingsToken');
-        const status = $('#settingsTokenStatus');
-        if (tokenInput) tokenInput.value = '';
-        if (status) { status.textContent = 'Token removido.'; status.className = 'ap-settings-status'; }
-        toast('Token removido');
-    });
-
-    $('#settingsToggleVis')?.addEventListener('click', () => {
-        const input = $('#settingsToken');
-        if (!input) return;
-        const isPassword = input.type === 'password';
-        input.type = isPassword ? 'text' : 'password';
-        $('#settingsToggleVis').textContent = isPassword ? 'Ocultar' : 'Ver';
-    });
-
-    /* ------------------------------------------------------- */
-    /*  Deploy                                                  */
-    /* ------------------------------------------------------- */
-    $('#btnDeploy').addEventListener('click', async () => {
-        const btn = $('#btnDeploy');
-        btn.disabled = true;
-        deployStatus.className = 'ap-deploy-status loading';
-        deployStatus.textContent = 'Publicando...';
-        try {
-            const data = await api.deploy();
-            deployStatus.className = 'ap-deploy-status success';
-            deployStatus.textContent = data.message || 'Publicado com sucesso!';
-            toast('Alterações publicadas!');
-        } catch (err) {
-            deployStatus.className = 'ap-deploy-status error';
-            deployStatus.textContent = 'Erro: ' + err.message;
-            toast(err.message, 'error');
-        }
-        btn.disabled = false;
-    });
 
     /* ------------------------------------------------------- */
     /*  PWA                                                     */

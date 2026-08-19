@@ -10,10 +10,16 @@
     const DATA_PATH = 'server/store-data.json';
     const ASSETS_DIR = 'public/assets/fotos-produtos/aplicadas';
     const BRANCH = 'main';
-    const ADMIN_PIN = '240726';
+    const ADMIN_PIN_HASH = 'c6077cbfabafcb1c8bb01c42c2409c956b415d700a1f191c70fdc73e3c9205f8';
     const GITHUB_API = 'https://api.github.com';
 
     const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+
+    async function hashPin(pin) {
+        const data = new TextEncoder().encode(pin);
+        const hash = await crypto.subtle.digest('SHA-256', data);
+        return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
 
     /* ------------------------------------------------------- */
     /*  Token                                                   */
@@ -80,7 +86,8 @@
             }
 
             // GitHub Pages: PIN or token
-            if (pin === ADMIN_PIN) {
+            const pinHash = await hashPin(pin);
+            if (pinHash === ADMIN_PIN_HASH) {
                 localStorage.setItem('tpoll_admin_session', 'active');
                 return { ok: true, mode: 'github' };
             }
@@ -140,7 +147,7 @@
 
         /* --- Products (write = token required) -------------- */
         async createProduct(product) {
-            if (!isLocal && !hasToken()) throw new Error('Salve um token GitHub na aba Config pra cadastrar produtos.');
+            if (!isLocal && !hasToken()) throw new Error('Salve um token GitHub para cadastrar produtos.');
             if (isLocal) {
                 const res = await fetch('/api/adminpanel/products', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -163,7 +170,7 @@
         },
 
         async updateProduct(id, updates) {
-            if (!isLocal && !hasToken()) throw new Error('Salve um token GitHub na aba Config pra editar.');
+            if (!isLocal && !hasToken()) throw new Error('Salve um token GitHub para editar.');
             if (isLocal) {
                 const res = await fetch(`/api/adminpanel/products/${id}`, {
                     method: 'PUT', headers: { 'Content-Type': 'application/json' },
@@ -181,7 +188,7 @@
         },
 
         async deleteProduct(id) {
-            if (!isLocal && !hasToken()) throw new Error('Salve um token GitHub na aba Config pra excluir.');
+            if (!isLocal && !hasToken()) throw new Error('Salve um token GitHub para excluir.');
             if (isLocal) {
                 const res = await fetch(`/api/adminpanel/products/${id}`, { method: 'DELETE', credentials: 'include' });
                 if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(d.error || 'Erro ao excluir.'); }
@@ -196,7 +203,7 @@
 
         /* --- Upload (token required) ------------------------ */
         async uploadImage(file) {
-            if (!isLocal && !hasToken()) throw new Error('Salve um token GitHub na aba Config pra enviar imagens.');
+            if (!isLocal && !hasToken()) throw new Error('Salve um token GitHub para enviar imagens.');
             if (isLocal) {
                 const fd = new FormData(); fd.append('image', file);
                 const res = await fetch('/api/adminpanel/upload', { method: 'POST', credentials: 'include', body: fd });
