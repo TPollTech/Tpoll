@@ -75,7 +75,7 @@
 
     function updateTokenBanner() {
         if (!tokenBanner) return;
-        if (!api.isLocal && !api.hasToken()) {
+        if (!api.isLocal && !api.hasToken() && location.hostname.includes('github.io')) {
             tokenBanner.hidden = false;
         } else {
             tokenBanner.hidden = true;

@@ -2,7 +2,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const { execSync } = require('child_process');
+const { execSync, exec } = require('child_process');
 const compression = require('compression');
 const bcrypt = require('bcryptjs');
 const multer = require('multer');
@@ -18,6 +18,9 @@ const DATA_FILE = path.join(__dirname, 'store-data.json');
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const TOKEN_SECRET = process.env.TPOLL_TOKEN_SECRET || (IS_PRODUCTION ? '' : 'troque-este-segredo-em-producao');
 const TOKEN_TTL_SECONDS = 60 * 60 * 8;
+const GITHUB_REPO = 'TPollTech/Tpoll';
+const GITHUB_DATA_PATH = 'server/store-data.json';
+const GITHUB_BRANCH = 'main';
 
 const ADMIN_AUTH_FILE = path.join(__dirname, 'admin-auth.json');
 const ADMIN_SESSIONS_FILE = path.join(__dirname, 'admin-sessions.json');
@@ -64,7 +67,35 @@ const defaultProducts = [
 
 function ensureDataFile() {
   if (fs.existsSync(DATA_FILE)) return;
+  // In production, try to fetch from GitHub first
+  if (IS_PRODUCTION) {
+    try {
+      const { execSync } = require('child_process');
+      const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_DATA_PATH}?ref=${GITHUB_BRANCH}`;
+      const result = execSync(`curl -s "${url}"`, { timeout: 15000, encoding: 'utf-8' });
+      const json = JSON.parse(result);
+      if (json.content) {
+        const content = Buffer.from(json.content, 'base64').toString('utf-8');
+        fs.writeFileSync(DATA_FILE, content, 'utf-8');
+        console.log('store-data.json fetched from GitHub');
+        return;
+      }
+    } catch (err) {
+      console.warn('Failed to fetch from GitHub, using defaults:', err.message);
+    }
+  }
   fs.writeFileSync(DATA_FILE, JSON.stringify(defaultProducts, null, 2), 'utf-8');
+}
+
+function gitPushAsync(message) {
+  if (!IS_PRODUCTION) return;
+  const siteDir = path.join(__dirname, '..');
+  exec(`git add ${DATA_FILE}`, { cwd: siteDir, timeout: 10000 }, () => {
+    exec(`git commit -m "${message}"`, { cwd: siteDir, timeout: 10000, stdio: 'pipe' }, (err) => {
+      if (err) return; // nothing to commit
+      exec('git push', { cwd: siteDir, timeout: 30000, stdio: 'pipe' }, () => {});
+    });
+  });
 }
 
 function readProducts() {
@@ -387,6 +418,21 @@ app.use(compression({
   level: 6
 }));
 
+// --- CORS -------------------------------------------------------------------
+
+app.use((req, res, next) => {
+  const allowed = ['https://tpolltech.github.io', 'http://localhost:5500', 'http://127.0.0.1:5500'];
+  const origin = req.headers.origin;
+  if (allowed.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
+});
+
 app.use((req, res, next) => {
   const pathname = req.path;
 
@@ -518,6 +564,7 @@ app.post('/api/admin/products', requireSameOrigin, requireLocalAdmin, (req, res)
   const products = readProducts();
   products.unshift(product);
   saveProducts(products);
+  gitPushAsync(`Admin: criou "${product.name}"`);
   return res.status(201).json(product);
 });
 
@@ -554,6 +601,7 @@ app.delete('/api/admin/products/:id', requireSameOrigin, requireLocalAdmin, (req
   }
 
   saveProducts(filtered);
+  gitPushAsync(`Admin: removeu produto ${id}`);
   return res.json({ ok: true });
 });
 
@@ -628,6 +676,7 @@ app.post('/api/adminpanel/products', requireAdminSession, (req, res) => {
   products.unshift(product);
   saveProducts(products);
   logAdminAction('CREATE_PRODUCT', { name: product.name, price: product.price });
+  gitPushAsync(`Admin: criou "${product.name}"`);
   return res.status(201).json(product);
 });
 
@@ -660,6 +709,7 @@ app.put('/api/adminpanel/products/:id', requireAdminSession, (req, res) => {
   products[index] = updated;
   saveProducts(products);
   logAdminAction('UPDATE_PRODUCT', { id, name: updated.name, changes });
+  gitPushAsync(`Admin: atualizou "${updated.name}"`);
   return res.json(updated);
 });
 
@@ -675,6 +725,7 @@ app.delete('/api/adminpanel/products/:id', requireAdminSession, (req, res) => {
 
   saveProducts(filtered);
   logAdminAction('DELETE_PRODUCT', { id, name: product ? product.name : 'unknown' });
+  gitPushAsync(`Admin: removeu "${product ? product.name : 'unknown'}"`);
   return res.json({ ok: true });
 });
 

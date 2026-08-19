@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: tpoll
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server/app.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TPOLL_TOKEN_SECRET
+        generateValue: true
+      - key: TPOLL_ADMIN_PIN
+        sync: false
+    healthCheckPath: /api/adminpanel/status
+    autoDeploy: true

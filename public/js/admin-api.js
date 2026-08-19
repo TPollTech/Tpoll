@@ -13,7 +13,7 @@
     const ADMIN_PIN_HASH = 'c6077cbfabafcb1c8bb01c42c2409c956b415d700a1f191c70fdc73e3c9205f8';
     const GITHUB_API = 'https://api.github.com';
 
-    const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+    const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname.endsWith('.onrender.com');
 
     async function hashPin(pin) {
         const data = new TextEncoder().encode(pin);
